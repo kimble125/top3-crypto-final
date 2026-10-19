@@ -66,7 +66,7 @@ Top 3 Crypto(https://top3-crypto.vercel.app)는 생성형 인공지능(AI)을 �
 
 - OpenAI (Codex CLI, ChatGPT 계정): 개인 플랜은 설정에 따라 대화가 모델 개선에 쓰일 수 있고, 끌 수 있습니다. https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance
 - Anthropic (Claude Code, 구독 계정): 계정의 모델 개선 설정에 따라 학습 사용 여부가 정해집니다. https://code.claude.com/docs/en/data-usage
-- 팀 계정 설정(2026-10-19 확인): Anthropic '모델 개선'은 꺼져 있다. OpenAI '모델 개선을 위한 데이터 학습 허용'은 켜져 있어 끈다. 어느 쪽이든 보내는 자료는 공개 자료뿐이다.
+- 팀 계정 설정(2026-10-19 확인): Anthropic '모델 개선'은 꺼져 있다. OpenAI '모델 개선을 위한 데이터 학습 허용'은 켜져 있었으며 이후 변경 여부는 미확인. 어느 쪽이든 보내는 자료는 공개 자료뿐이다.
 
 ## 8. 문의
 

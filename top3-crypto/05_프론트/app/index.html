@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 10-14 V5: AI 학습 수집 차단 요청(보장은 아님. robots.txt 는 배포 스크립트가 따로 만든다) -->
+<meta name="robots" content="noai, noimageai">
+<title>Top 3 Crypto</title>
+<link rel="icon" type="image/png" href="img/logo_ai.png">
+<!-- 글씨체(10-13 v4): Pretendard(SIL OFL 1.1, 길형진). 애플 기기는 시스템 글꼴, 그 밖(윈도 등)은 Pretendard로 보인다 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="style.css?v=5.1014">
+</head>
+<body>
+<header class="gnav">
+  <div class="gnav-in">
+    <span class="brand"><img class="logo" src="img/logo_ai_mono.png" alt="" width="26" height="26"><span class="brand-t"><b>Top</b> <span class="brand-3">3</span> <i>Crypto</i></span></span>
+    <nav class="tabs" role="tablist" aria-label="화면">
+      <button role="tab" class="on" data-view="now" aria-selected="true">홈</button>
+      <button role="tab" data-view="ai" aria-selected="false">AI 분석</button>
+      <button role="tab" data-view="study" aria-selected="false">공부</button>
+      <button role="tab" data-view="settings" aria-selected="false">설정</button>
+      <!-- 상태 이상(자료 멈춤·저장본 보기 등)일 때만 나오는 탭(10-13 v4) -->
+      <button role="tab" data-view="status" aria-selected="false" class="tab-warn" id="tab-status" hidden>⚠ 상태</button>
+    </nav>
+    <span class="ref-line" id="ref-line">바이낸스 현물 · 불러오는 중…</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 홈(10-13 v4, 호연 P5·P6): 뉴스 띠 → 코인 확신도 카드 3개 → 고른 코인의 지표 그래프 → AI 분석 · 근거 -->
+  <section id="view-now">
+    <div class="ticker mt" id="ticker" hidden>
+      <div class="ticker-line" id="ticker-line" tabindex="0" role="button" aria-expanded="false" aria-controls="ticker-list" aria-label="뉴스 목록 보기">
+        <span class="tk-tag">뉴스</span><span class="tk-main" id="tk-main"></span>
+        <button type="button" class="more-link tk-more" id="tk-more">자세히 ▾</button>
+      </div>
+      <ul class="ticker-list" id="ticker-list"></ul>
+    </div>
+
+    <div class="grid g3 kpi-row" id="cards" role="group" aria-label="코인 고르기"></div>
+
+    <article class="tile mt" id="chart-tile">
+      <div class="tile-h"><h3 id="chart-title">지표 그래프</h3>
+        <div class="chart-tools">
+          <span class="fine chart-hilo num" id="chart-hilo"></span>
+          <div class="seg" id="chart-range" role="group" aria-label="기간"><button data-days="1">1일</button><button data-days="3" class="on">3일</button><button data-days="7">7일</button></div>
+          <span class="help" tabindex="0">i<span class="tip">판정에 쓰는 것과 같은 닫힌 봉으로 그린 지표입니다. 15분마다 새 봉이 들어오면 1분 안에 반영됩니다. <span class="local-only" hidden>▲▼는 교차(MACD는 시그널선, Stochastic·StochRSI는 %K와 %D, VPCI는 방향이 바뀐 때)입니다. </span>지표 버튼: 처음엔 네 칸으로 나눠 보이고, 하나를 누르면 그것만, 흐린 버튼을 더 누르면 한 칸에 겹칩니다.</span></span>
+        </div>
+      </div>
+      <div class="chart-chips" id="chart-chips" role="group" aria-label="지표 고르기"></div>
+      <div class="chart-wrap" id="chart-wrap"><div id="chart-svg" tabindex="0" aria-label="지표 그래프. 좌우 화살표로 시각을 옮겨 값을 봅니다(Shift는 4시간씩)"><p class="muted">그래프를 불러오는 중…</p></div><div class="chart-tip" id="chart-tip" role="status" aria-live="polite" hidden></div></div>
+      <p class="fine" id="chart-note" hidden>단위가 다른 지표는 각자 눈금입니다(오른쪽 숫자). 선이 만나는 높이보다 방향과 교차 시점을 보세요.</p>
+      <button class="chart-brief" id="chart-brief" type="button" aria-controls="evidence" hidden></button>
+    </article>
+
+    <div class="grid g2 home-pair">
+      <article class="tile" id="ai-brief">
+        <div class="tile-h"><h3>AI 분석</h3><span class="fine" id="ai-brief-meta"></span></div>
+        <div id="ai-brief-body"></div>
+        <button type="button" class="more-link" id="ai-brief-more">자세히 ▾</button>
+      </article>
+      <article class="tile" id="evidence">
+        <div class="tile-h"><h3>근거</h3><span class="fine" id="ev-meta"></span>
+          <span class="help" tabindex="0">i<span class="tip">확신도는 기술 지표 4개와 시장 자료 4개(OI·프리미엄·공포탐욕·뉴스) 두 묶음의 신호가 같은 방향을 가리키는 정도입니다. 묶음마다 가중치 8·7·6·5를 두고 신호마다 Long +1 · Short −1(힘이 약해지면 ±0.5)로 읽어 −100–+100 점수를 냅니다. 두 묶음 점수의 평균 D로 50 + 0.4 × D(10–90%)를 계산해 우세한 쪽을 보여 줍니다. 자료가 절반에 못 미치는 묶음은 빼고, 확률이 아닙니다. 줄 끝 'AI 25%'는 AI가 추세 판단에 둔 비중입니다.</span></span>
+        </div>
+        <div id="ev-body"></div>
+        <button type="button" class="more-link" id="ev-more">자세히 ▾</button>
+      </article>
+    </div>
+  </section>
+
+  <!-- AI 분석(10-13 v4): 공부 탭처럼 왼쪽 목차 + 오른쪽 본문. 정미님 프롬프트·출력 예시의 6대 분류를 그 순서·이름 그대로.
+       맥에서 직접 연 화면(보드 응답 scope=local)에서 설정의 '검증 화면'을 켜면 목차 7 '검증'이 나온다. 공개 화면에는 없음(10-13 결정 84-A) -->
+  <section id="view-ai" hidden>
+    <div class="study ai-layout mt">
+      <nav class="tile study-nav ai-toc" id="ai-toc" aria-label="AI 분석 목차">
+        <div class="toc-h">목차</div>
+        <button data-sec="1">1 AI Strategy</button>
+        <button data-sec="2">2 Confidence</button>
+        <button data-sec="3">3 News Analysis</button>
+        <button data-sec="4">4 Fear &amp; Greed Analysis</button>
+        <button data-sec="5">5 Market Flow &amp; Derivatives</button>
+        <button data-sec="6">6 Technical Analysis</button>
+        <button data-sec="7" class="vz-link" hidden>7 검증</button>
+      </nav>
+      <article class="tile study-doc ai-doc" id="ai-doc">
+        <div class="ai-top">
+          <div class="seg" id="ai-coin" role="group" aria-label="코인"><button data-sym="BTCUSDT">BTC</button><button data-sym="ETHUSDT">ETH</button><button data-sym="XRPUSDT">XRP</button></div>
+          <span class="fine" id="ai-report-meta"></span>
+        </div>
+        <div id="ai-report-body"><p class="muted">AI 분석은 하루 2번(09·21시)과 Core Condition이 켜질 때 만듭니다. 준비 중입니다.</p></div>
+
+        <!-- 7 검증(맥에서 직접 연 화면에서 설정으로 켬): 트리거 성적 → 지표 상태 → 이전 방식 기록 -->
+        <div class="verify-zone" id="verify-zone" hidden>
+          <h2 class="air-h" id="ai-sec-7"><span class="sec-n">7</span>검증</h2>
+          <p class="fine">팀 Mac에서 직접 연 화면에서 설정의 '검증 화면'을 켠 경우에만 보입니다.</p>
+          <div class="vz-card" id="scoring">
+            <div class="tile-h"><h3>트리거 성적 리포트</h3>
+              <span class="help" tabindex="0">i<span class="tip" data-vt="tip_scoring"></span></span>
+            </div>
+            <div id="score-body"></div>
+          </div>
+          <div class="vz-card" id="ind-status">
+            <div class="tile-h"><h3>지표 상태 · 시간대별</h3>
+              <span class="help" tabindex="0">i<span class="tip" data-vt="tip_ind"></span></span>
+            </div>
+            <div id="ind-body"></div>
+            <h4 class="vz-sub">지표별 값 · <span id="ev-old-title"></span></h4>
+            <div id="ev-old-body"></div>
+          </div>
+          <div class="vz-card" id="old-track">
+            <div class="tile-h"><h3>이전 방식 기록 · 4시간 분석</h3>
+              <span class="help" tabindex="0">i<span class="tip" data-vt="tip_old"></span></span>
+            </div>
+            <div id="track-body"></div>
+            <div class="tile-h mt"><h4>지난 4시간 분석</h4>
+              <div class="seg" id="hist-filter" role="group" aria-label="종목">
+                <button class="on" data-sym="">전체</button><button data-sym="BTCUSDT">BTC</button><button data-sym="ETHUSDT">ETH</button><button data-sym="XRPUSDT">XRP</button>
+              </div>
+            </div>
+            <div class="tbl" id="hist-body"></div>
+            <p class="fine">운영 기록만 보여줍니다(과거 재현은 섞지 않음).</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 설정(10-06 호연 P3, 10-13 v4): 이 기기에만 저장(localStorage). 성적 리포트에 매매 트리거 기록(Signal) -->
+  <section id="view-settings" hidden>
+    <div class="grid g2 mt">
+      <article class="tile set-tile">
+        <h3>화면</h3>
+        <div class="set-row"><span>테마</span><div class="seg" data-set="theme"><button data-v="system">시스템</button><button data-v="dark">어둡게</button><button data-v="light">밝게</button></div></div>
+        <div class="set-row"><span>상승·하락 색</span><div class="seg" data-set="palette"><button data-v="kr">빨강·파랑</button><button data-v="neon">민트·마젠타</button></div></div>
+        <div class="set-row"><span>처음 보여 줄 코인</span><div class="seg" data-set="coin"><button data-v="BTCUSDT">BTC</button><button data-v="ETHUSDT">ETH</button><button data-v="XRPUSDT">XRP</button></div></div>
+        <div class="set-row"><span>그래프 기본 기간</span><div class="seg" data-set="days"><button data-v="1">1일</button><button data-v="3">3일</button><button data-v="7">7일</button></div></div>
+        <div class="set-row" id="verify-row" hidden><span>검증 화면<small>AI 분석 탭 목차에 '7 검증'(트리거 성적·지표 상태·이전 방식 기록)이 생기고, 성적 리포트에 결과 열이 더해집니다. 팀 Mac에서 직접 연 화면에만 있습니다</small></span><button type="button" class="toggle" id="verify-toggle" aria-pressed="false">꺼짐</button></div>
+      </article>
+      <article class="tile set-tile">
+        <h3>알림</h3>
+        <div class="set-row"><span>매매 트리거가 나면 알림<small>이 기기에서 보드를 열어 둔 동안. 팀 알림은 디스코드 #신호</small></span><button type="button" class="toggle" id="notify-toggle" aria-pressed="false">꺼짐</button></div>
+        <div class="set-row"><span>알림 받을 코인</span><div class="checks" id="notify-coins"><label><input type="checkbox" value="BTCUSDT" checked> BTC</label><label><input type="checkbox" value="ETHUSDT" checked> ETH</label><label><input type="checkbox" value="XRPUSDT" checked> XRP</label></div></div>
+        <p class="fine" id="notify-note"></p>
+      </article>
+      <article class="tile set-tile" id="records">
+        <div class="tile-h"><h3>성적 리포트</h3><span class="fine" id="rec-meta"></span>
+          <span class="help" tabindex="0">i<span class="tip">지금까지 난 매매 트리거(Signal)의 시각·코인·방향과 Open U$(트리거가 난 15분봉 종가, 바이낸스 현물)입니다. 디스코드 #신호에도 같은 내용이 갑니다.</span></span>
+        </div>
+        <div class="tbl" id="rec-body"><p class="muted">불러오는 중…</p></div>
+      </article>
+      <article class="tile set-tile">
+        <h3>정보</h3>
+        <p class="fine">데이터: 바이낸스 현물 USDT 캔들(15분·1시간·4시간), 공포탐욕지수(alternative.me), 뉴스(네이버 뉴스 검색·GDELT), 바이낸스 미결제약정·코인베이스 현물.<br>Core Condition·확신도는 15분마다, AI 분석은 하루 2번(09·21시)과 Core Condition이 켜질 때. 규칙 버전 <span id="set-rule">-</span>.</p>
+        <p class="fine"><a href="#status" data-open="status">데이터 상태</a> · 글씨체 Pretendard(SIL Open Font License 1.1)</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 공부 -->
+  <section id="view-study" hidden>
+    <div class="study mt">
+      <nav class="tile study-nav" id="study-nav" aria-label="공부 노트 목차"></nav>
+      <article class="tile study-doc" id="study-doc"><p class="muted">왼쪽에서 장을 고르세요.</p></article>
+    </div>
+  </section>
+
+  <!-- 데이터 상태(상태 이상이면 상단에 '⚠ 상태' 탭이 나온다) -->
+  <section id="view-status" hidden>
+    <div id="status-alerts" class="mt"></div>
+    <div class="grid g2" id="status-body"></div>
+  </section>
+
+  <footer class="foot"><p><a href="#study" data-open="guide">사용 방법</a> · <a href="https://github.com/kimble125/top3-crypto-final/blob/main/docs/legal/terms-of-service.md" target="_blank" rel="noopener noreferrer">이용약관</a> · <a href="https://github.com/kimble125/top3-crypto-final/blob/main/docs/legal/privacy-policy.md" target="_blank" rel="noopener noreferrer">개인정보 처리방침</a> · <a href="https://github.com/kimble125/top3-crypto-final/blob/main/docs/legal/ai-notice.md" target="_blank" rel="noopener noreferrer">AI 이용 고지</a> · 정보 제공용이며 투자 권유가 아닙니다. 시세는 바이낸스·코인베이스, 공포탐욕지수는 alternative.me, 뉴스는 네이버 뉴스 검색과 <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener noreferrer">GDELT 프로젝트</a>에서 받으며 이들과 제휴 관계가 없습니다.</p></footer>
+</main>
+<script src="config.js" onerror="void 0"></script>
+<!-- ?v=: 새 버전을 올렸을 때 브라우저가 옛 JS·CSS를 섞어 쓰지 않게(GPT 검토 10-13). 버전을 올릴 때 함께 바꾼다 -->
+<script src="chart.js?v=5.1014"></script>
+<script src="now15.js?v=5.1014"></script>
+<script src="view5.js?v=5.1014"></script>
+<script src="app.js?v=5.1014"></script>
+</body>
+</html>

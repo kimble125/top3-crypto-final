@@ -1,0 +1,30 @@
+{
+  "version": "v0",
+  "note": "사전등록 규칙 예시 3개. 숫자는 예시이며 사용자가 정한다. 규칙은 거래 전에 등록하고, 바꾸면 날짜와 이유를 남긴다.",
+  "rules": [
+    {
+      "id": "max_weight",
+      "type": "max_weight",
+      "name": "단일 자산 비중 상한",
+      "params": {"max_weight": 0.4},
+      "applies_to": ["buy"],
+      "why": "한 자산에 쏠리면 한 번의 오판이 전체 손실이 된다"
+    },
+    {
+      "id": "stop_loss",
+      "type": "stop_loss",
+      "name": "손절선 아래 추가 매수 금지",
+      "params": {"loss_pct": 0.15},
+      "applies_to": ["buy"],
+      "why": "평균단가 대비 손실이 손절선을 넘긴 자산은 먼저 손절 여부를 정하고, 물타기로 손실을 키우지 않는다"
+    },
+    {
+      "id": "add_buy",
+      "type": "add_buy",
+      "name": "추가 매수 조건",
+      "params": {"min_dip_pct": 0.05},
+      "applies_to": ["buy"],
+      "why": "이미 보유한 자산은 평균단가보다 일정 비율 이상 싸졌을 때만 더 산다(감정 매수 방지)"
+    }
+  ]
+}

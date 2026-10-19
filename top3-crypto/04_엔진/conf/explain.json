@@ -1,0 +1,37 @@
+{
+  "_설명": "공개 저장소용 설정 사본(2026-10-20). 팀 내부 메모는 지웠고, 운영 맥의 경로는 기본 명령 이름으로 바꿨다.",
+  "enabled": true,
+  "provider": "codex_cli",
+  "codex_bin": "codex",
+  "codex_model": "gpt-6-luna",
+  "codex_effort": "medium",
+  "codex_timeout_sec": 240,
+  "fallback": {
+    "enabled": true,
+    "cli": "claude",
+    "model": "sonnet",
+    "timeout_sec": 180
+  },
+  "model": "gpt-6.1-sol",
+  "endpoint": "https://api.openai.com/v1/responses",
+  "prompt_file": "prompts/explain_v2.md",
+  "prompt_version": "explain_v2.0",
+  "shadow": false,
+  "short_gpt": false,
+  "deep_report": false,
+  "max_chars_per_symbol": 240,
+  "timeout_sec": 60,
+  "forbidden": [
+    "사세요",
+    "매수하세요",
+    "파세요",
+    "매도하세요",
+    "추천",
+    "보장",
+    "확실히 오",
+    "확실히 내",
+    "무조건",
+    "반드시 오",
+    "반드시 내"
+  ]
+}

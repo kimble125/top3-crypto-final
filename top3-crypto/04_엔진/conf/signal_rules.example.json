@@ -1,0 +1,104 @@
+{
+  "_설명": "공개 저장소용 설정 사본(2026-10-20). 팀 내부 메모는 지웠고, 운영 맥의 경로는 기본 명령 이름으로 바꿨다.",
+  "version": "0.1-draft",
+  "timeframe": "4h",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "XRPUSDT"
+  ],
+  "indicators": {
+    "macd": {
+      "params": {
+        "fast": 12,
+        "slow": 26,
+        "signal": 9
+      },
+      "options": {
+        "cross": "MACD선이 시그널선을 위로 뚫는 봉에서만 매수(골든크로스), 아래로 뚫으면 매도",
+        "zero_line": "MACD선이 0 위에 있는 동안 매수 상태, 아래면 매도 상태",
+        "histogram_sign": "히스토그램(MACD-시그널)이 플러스면 매수 상태, 마이너스면 매도 상태"
+      },
+      "choice": null
+    },
+    "stochastic": {
+      "params": {
+        "k": 14,
+        "d": 3,
+        "smooth_k": 3,
+        "overbought": 80,
+        "oversold": 20
+      },
+      "options": {
+        "zone": "oversold 아래에서 위로 올라오면 매수, overbought 위에서 아래로 내려오면 매도",
+        "kd_cross": "%K가 %D를 위로 뚫으면 매수, 아래로 뚫으면 매도",
+        "zone_and_cross": "zone 조건과 kd_cross가 동시에 맞을 때만"
+      },
+      "choice": null
+    },
+    "stochrsi": {
+      "params": {
+        "rsi_length": 14,
+        "stoch_length": 14,
+        "k": 3,
+        "d": 3,
+        "overbought": 0.8,
+        "oversold": 0.2
+      },
+      "options": {
+        "zone": "oversold 아래에서 위로 올라오면 매수, overbought 위에서 아래로 내려오면 매도",
+        "kd_cross": "%K가 %D를 위로 뚫으면 매수, 아래로 뚫으면 매도"
+      },
+      "choice": null
+    },
+    "vpci": {
+      "params": {
+        "short": 5,
+        "long": 25
+      },
+      "options": {
+        "sign": "VPCI가 플러스면 상승을 거래량이 확인(매수 상태), 마이너스면 매도 상태",
+        "rising": "VPCI가 이전 봉보다 오르면 매수, 내리면 매도",
+        "sign_and_rising": "플러스이면서 오르는 중일 때만 매수"
+      },
+      "choice": null
+    }
+  },
+  "combination": {
+    "options": {
+      "all_agree": "4개 전부 같은 방향일 때만",
+      "score": "합산 점수가 threshold 이상/이하일 때"
+    },
+    "choice": null,
+    "score_threshold": 3,
+    "weights": {
+      "macd": 1,
+      "stochastic": 1,
+      "stochrsi": 1,
+      "vpci": 1
+    },
+    "tries_log": []
+  },
+  "ai_report_gate": {
+    "enabled": true,
+    "min_confidence": 0.6
+  },
+  "output": {
+    "spot_wording": {
+      "buy": "매수 관심",
+      "sell": "현금화 관심",
+      "hold": "관망"
+    },
+    "cooldown_bars": 3
+  },
+  "costs": {
+    "fee_pct": 0.05,
+    "slippage_pct": 0.05
+  },
+  "pass_criteria": {
+    "benchmark": "BTC buy-and-hold, 같은 구간",
+    "min_trades": 100,
+    "must_beat_benchmark_after_costs": true,
+    "report_out_of_sample_separately": true
+  }
+}

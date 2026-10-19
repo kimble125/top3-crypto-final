@@ -1,0 +1,12 @@
+{
+  "_설명": "공개 저장소용 설정 사본(2026-10-20). 팀 내부 메모는 지웠고, 운영 맥의 경로는 기본 명령 이름으로 바꿨다. mode는 dry_run(메시지를 보내지 않고 기록만)으로 바꿨다.",
+  "mode": "dry_run",
+  "timeout_sec": 15,
+  "regular": false,
+  "alerts": {
+    "enabled": false,
+    "news_n": 3,
+    "score100": false,
+    "strong15": false
+  }
+}

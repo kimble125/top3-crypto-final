@@ -1,0 +1,631 @@
+{
+ "meta": {
+  "title": "알프레도 MVP 데모",
+  "version": "V1",
+  "built_at": "2026-10-19T01:05:45+00:00",
+  "engine": "alfredo v0.0.1 (모의 전용)",
+  "band": "AI가 만든 정보이며 투자 권유가 아닙니다. 모의투자 기준입니다.",
+  "scenario": "시연용 합성 시나리오: 가상 1,000만 원을 '중립' 예시 배분으로 시작해 한 주를 보낸 기록입니다. 가격도 합성값이며 실제 시세가 아닙니다.",
+  "price_note": "합성 가격(시드 20261013 고정, 시작 100, 기대 수익 0, 자산마다 연 변동성만 다름, 주식·채권·금은 주말 휴장). 실제 시세가 아닙니다.",
+  "fill_rule": "그날 종가를 보고 정하고, 다음 날 시가에 체결합니다(종가 체결은 미래 정보가 섞여 쓰지 않음).",
+  "seed": 20261013,
+  "start": "2026-09-30",
+  "end": "2026-10-07",
+  "capital": 10000000,
+  "fee": 0.0005,
+  "slippage": 0.001,
+  "template_name": "중립",
+  "template": {
+   "주식": 0.4,
+   "채권": 0.35,
+   "금": 0.05,
+   "코인": 0.02,
+   "현금": 0.18
+  },
+  "templates": {
+   "보수": {
+    "주식": 0.2,
+    "채권": 0.55,
+    "금": 0.05,
+    "코인": 0.0,
+    "현금": 0.2
+   },
+   "중립": {
+    "주식": 0.4,
+    "채권": 0.35,
+    "금": 0.05,
+    "코인": 0.02,
+    "현금": 0.18
+   },
+   "적극": {
+    "주식": 0.6,
+    "채권": 0.33,
+    "금": 0.05,
+    "코인": 0.02,
+    "현금": 0.0
+   }
+  },
+  "template_basis": [
+   {
+    "text": "주식:채권은 공개 자산배분 펀드 Vanguard LifeStrategy의 고정 비율(Income 20:80, Conservative Growth 40:60, Moderate Growth 60:40)에서 출발했습니다. Income·Conservative Growth의 단기 채권 20%는 현금 칸으로 옮겼습니다.",
+    "url": "https://www.sec.gov/Archives/edgar/data/0000736054/000093247108000728/starfunds485b022008.txt"
+   },
+   {
+    "text": "금 5%: 세계금협회(WGC, 2013-10-30 보도자료)는 주식 60·채권 40 포트폴리오의 최적 금 비중을 약 5–6%로 들었습니다. 세 템플릿 모두 5%로 두고 채권에서 뺐습니다.",
+    "url": "https://www.gold.org/news-and-events/press-releases/investors-should-resist-being-seduced-short-term-headlines-when"
+   },
+   {
+    "text": "코인 2% 이하: BlackRock Investment Institute('Sizing bitcoin in portfolios', 2024-12)는 비트코인 1–2%를 '합리적 범위'로 들고, 그보다 크면 위험 몫이 급히 커진다고 했습니다. 코인 칸 안은 BTC·ETH·XRP 같은 비중(예시)입니다.",
+    "url": "https://www.blackrock.com/institutions/en-us/insights/thought-leadership/portfolio-design/sizing-bitcoin-in-portfolios"
+   }
+  ],
+  "rebal_band": 0.05,
+  "grade_band": 0.01,
+  "assets": [
+   {
+    "id": "주식",
+    "group": "주식",
+    "label": "주식(지수형 예시)",
+    "vol": 0.18,
+    "weekend": false
+   },
+   {
+    "id": "채권",
+    "group": "채권",
+    "label": "채권(지수형 예시)",
+    "vol": 0.06,
+    "weekend": false
+   },
+   {
+    "id": "금",
+    "group": "금",
+    "label": "금",
+    "vol": 0.15,
+    "weekend": false
+   },
+   {
+    "id": "BTC",
+    "group": "코인",
+    "label": "비트코인",
+    "vol": 0.5,
+    "weekend": true
+   },
+   {
+    "id": "ETH",
+    "group": "코인",
+    "label": "이더리움",
+    "vol": 0.65,
+    "weekend": true
+   },
+   {
+    "id": "XRP",
+    "group": "코인",
+    "label": "리플",
+    "vol": 0.8,
+    "weekend": true
+   }
+  ],
+  "top3_url": "https://top3-crypto.vercel.app"
+ },
+ "portfolio": {
+  "total": 10060071,
+  "cash": 1500000,
+  "return": 0.006007067903659458,
+  "positions": [
+   {
+    "id": "주식",
+    "label": "주식(지수형 예시)",
+    "group": "주식",
+    "qty": 44496.5128,
+    "avg_cost": 89.89,
+    "price": 90.13,
+    "value": 4010471,
+    "weight": 0.3986523385581782,
+    "unrealized": 10471,
+    "unrealized_pct": 0.0026176755646245553
+   },
+   {
+    "id": "채권",
+    "label": "채권(지수형 예시)",
+    "group": "채권",
+    "qty": 34135.1447,
+    "avg_cost": 102.53,
+    "price": 102.96,
+    "value": 3514555,
+    "weight": 0.34935683997896505,
+    "unrealized": 14555,
+    "unrealized_pct": 0.00415842925521881
+   },
+   {
+    "id": "금",
+    "label": "금",
+    "group": "금",
+    "qty": 4488.0517,
+    "avg_cost": 111.41,
+    "price": 113.49,
+    "value": 509349,
+    "weight": 0.050630756651604825,
+    "unrealized": 9349,
+    "unrealized_pct": 0.01869798089649355
+   },
+   {
+    "id": "BTC",
+    "label": "비트코인",
+    "group": "코인",
+    "qty": 570.8007,
+    "avg_cost": 116.79,
+    "price": 118.01,
+    "value": 67360,
+    "weight": 0.006695797514452002,
+    "unrealized": 694,
+    "unrealized_pct": 0.010402943718570423
+   },
+   {
+    "id": "ETH",
+    "label": "이더리움",
+    "group": "코인",
+    "qty": 189.2823,
+    "avg_cost": 352.21,
+    "price": 336.15,
+    "value": 63627,
+    "weight": 0.006324729897877773,
+    "unrealized": -3039,
+    "unrealized_pct": -0.04559155302300555
+   },
+   {
+    "id": "XRP",
+    "label": "리플",
+    "group": "코인",
+    "qty": 1953.7151,
+    "avg_cost": 187.68,
+    "price": 202.03,
+    "value": 394709,
+    "weight": 0.03923521717523493,
+    "unrealized": 28042,
+    "unrealized_pct": 0.07647924879149226
+   }
+  ],
+  "groups": [
+   {
+    "group": "주식",
+    "target": 0.4,
+    "actual": 0.3986523385581782,
+    "drift": -0.0013476614418218014,
+    "ok": true
+   },
+   {
+    "group": "채권",
+    "target": 0.35,
+    "actual": 0.34935683997896505,
+    "drift": -0.0006431600210349275,
+    "ok": true
+   },
+   {
+    "group": "금",
+    "target": 0.05,
+    "actual": 0.050630756651604825,
+    "drift": 0.0006307566516048219,
+    "ok": true
+   },
+   {
+    "group": "코인",
+    "target": 0.02,
+    "actual": 0.0522557445875647,
+    "drift": 0.032255744587564694,
+    "ok": true
+   },
+   {
+    "group": "현금",
+    "target": 0.18,
+    "actual": 0.14910432022368722,
+    "drift": -0.030895679776312773,
+    "ok": true
+   }
+  ],
+  "series": [
+   {
+    "date": "2026-09-30",
+    "mine": 10000000,
+    "bm5": 10000000,
+    "b6040": 10000000
+   },
+   {
+    "date": "2026-10-01",
+    "mine": 10083745,
+    "bm5": 10083745,
+    "b6040": 10127245
+   },
+   {
+    "date": "2026-10-02",
+    "mine": 10050080,
+    "bm5": 10050080,
+    "b6040": 10073200
+   },
+   {
+    "date": "2026-10-03",
+    "mine": 10057041,
+    "bm5": 10057041,
+    "b6040": 10073200
+   },
+   {
+    "date": "2026-10-04",
+    "mine": 10076596,
+    "bm5": 10063524,
+    "b6040": 10073200
+   },
+   {
+    "date": "2026-10-05",
+    "mine": 10010717,
+    "bm5": 9995273,
+    "b6040": 9968679
+   },
+   {
+    "date": "2026-10-06",
+    "mine": 10029639,
+    "bm5": 10025561,
+    "b6040": 10016345
+   },
+   {
+    "date": "2026-10-07",
+    "mine": 10060071,
+    "bm5": 10046813,
+    "b6040": 10032340
+   }
+  ],
+  "costs": {
+   "fees": 4248,
+   "slippage": 8487,
+   "total": 12735
+  }
+ },
+ "principles": {
+  "version": "v0",
+  "rate": 0.8888888888888888,
+  "ok": 8,
+  "count": 9,
+  "rules": [
+   {
+    "id": "max_weight",
+    "name": "단일 자산 비중 상한",
+    "params": {
+     "max_weight": 0.4
+    },
+    "why": "한 자산에 쏠리면 한 번의 오판이 전체 손실이 된다"
+   },
+   {
+    "id": "stop_loss",
+    "name": "손절선 아래 추가 매수 금지",
+    "params": {
+     "loss_pct": 0.15
+    },
+    "why": "평균단가 대비 손실이 손절선을 넘긴 자산은 먼저 손절 여부를 정하고, 물타기로 손실을 키우지 않는다"
+   },
+   {
+    "id": "add_buy",
+    "name": "추가 매수 조건",
+    "params": {
+     "min_dip_pct": 0.05
+    },
+    "why": "이미 보유한 자산은 평균단가보다 일정 비율 이상 싸졌을 때만 더 산다(감정 매수 방지)"
+   }
+  ],
+  "judgements": [
+   {
+    "trade_id": 2,
+    "date": "2026-10-01",
+    "symbol": "주식",
+    "note": "출발 배분 40.0%",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "주식 매수 후 비중 40.0% (상한 40%)"
+   },
+   {
+    "trade_id": 3,
+    "date": "2026-10-01",
+    "symbol": "채권",
+    "note": "출발 배분 35.0%",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "채권 매수 후 비중 35.0% (상한 40%)"
+   },
+   {
+    "trade_id": 4,
+    "date": "2026-10-01",
+    "symbol": "금",
+    "note": "출발 배분 5.0%",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "금 매수 후 비중 5.0% (상한 40%)"
+   },
+   {
+    "trade_id": 5,
+    "date": "2026-10-01",
+    "symbol": "BTC",
+    "note": "출발 배분 0.7%",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "BTC 매수 후 비중 0.7% (상한 40%)"
+   },
+   {
+    "trade_id": 6,
+    "date": "2026-10-01",
+    "symbol": "ETH",
+    "note": "출발 배분 0.7%",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "ETH 매수 후 비중 0.7% (상한 40%)"
+   },
+   {
+    "trade_id": 7,
+    "date": "2026-10-01",
+    "symbol": "XRP",
+    "note": "출발 배분 0.7%",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "XRP 매수 후 비중 0.7% (상한 40%)"
+   },
+   {
+    "trade_id": 8,
+    "date": "2026-10-04",
+    "symbol": "XRP",
+    "note": "하루 크게 오른 걸 보고 추가 매수",
+    "rule_id": "max_weight",
+    "rule_name": "단일 자산 비중 상한",
+    "ok": true,
+    "detail": "XRP 매수 후 비중 3.8% (상한 40%)"
+   },
+   {
+    "trade_id": 8,
+    "date": "2026-10-04",
+    "symbol": "XRP",
+    "note": "하루 크게 오른 걸 보고 추가 매수",
+    "rule_id": "stop_loss",
+    "rule_name": "손절선 아래 추가 매수 금지",
+    "ok": true,
+    "detail": "XRP 평균단가 대비 +16.8%에서 추가 매수 (손절선 −15%)"
+   },
+   {
+    "trade_id": 8,
+    "date": "2026-10-04",
+    "symbol": "XRP",
+    "note": "하루 크게 오른 걸 보고 추가 매수",
+    "rule_id": "add_buy",
+    "rule_name": "추가 매수 조건",
+    "ok": false,
+    "detail": "XRP 평균단가 대비 +16.8%에서 추가 매수 (조건 −5% 이하)"
+   }
+  ]
+ },
+ "weekly": {
+  "scorecard": [
+   {
+    "metric": "수익률(비용 후)",
+    "bench_name": "출발 배분 그대로",
+    "mine": 0.006007067903659458,
+    "bench": 0.00468133031257012,
+    "diff": 0.0013257375910893376,
+    "grade": "기준 근처",
+    "better": "높을수록"
+   },
+   {
+    "metric": "수익률(비용 후)",
+    "bench_name": "주식 60·채권 40 그대로",
+    "mine": 0.006007067903659458,
+    "bench": 0.003233977040862257,
+    "diff": 0.0027730908627972006,
+    "grade": "기준 근처",
+    "better": "높을수록"
+   },
+   {
+    "metric": "최대 낙폭(일 종가)",
+    "bench_name": "출발 배분 그대로",
+    "mine": -0.007242150609718889,
+    "bench": -0.00877372444463842,
+    "diff": 0.0015315738349195307,
+    "grade": "기준 근처",
+    "better": "0에 가까울수록"
+   },
+   {
+    "metric": "원칙 이행률",
+    "bench_name": "목표 90%(사용자 설정)",
+    "mine": 0.8888888888888888,
+    "bench": 0.9,
+    "diff": -0.011111111111111183,
+    "grade": "기준 미만",
+    "better": "높을수록"
+   }
+  ],
+  "honest": "이번 주 내 장부와 출발 배분의 차이는 +0.1%p로 ±1%p 안입니다. 이번 주 거래의 효과는 보이지 않습니다. 원칙을 어긴 거래는 1건입니다.",
+  "range_review": [
+   {
+    "id": "주식",
+    "low": -0.03875007001567103,
+    "high": 0.026706197681147348,
+    "actual": 0.0050178412132024786,
+    "inside": true,
+    "n_windows": 173,
+    "lookback_days": 180
+   },
+   {
+    "id": "채권",
+    "low": -0.010422637192157747,
+    "high": 0.01317744748801704,
+    "actual": 0.005272407732864526,
+    "inside": true,
+    "n_windows": 173,
+    "lookback_days": 180
+   },
+   {
+    "id": "금",
+    "low": -0.01570194183777751,
+    "high": 0.034721425055013966,
+    "actual": 0.0177562550443906,
+    "inside": true,
+    "n_windows": 173,
+    "lookback_days": 180
+   },
+   {
+    "id": "BTC",
+    "low": -0.11828057797935436,
+    "high": 0.11640454855851604,
+    "actual": 0.006997184060073547,
+    "inside": true,
+    "n_windows": 173,
+    "lookback_days": 180
+   },
+   {
+    "id": "ETH",
+    "low": -0.07318634717539593,
+    "high": 0.1587828588753414,
+    "actual": -0.02961808261886223,
+    "inside": true,
+    "n_windows": 173,
+    "lookback_days": 180
+   },
+   {
+    "id": "XRP",
+    "low": -0.1334961316234798,
+    "high": 0.18378064927075555,
+    "actual": 0.2207250755287009,
+    "inside": false,
+    "n_windows": 173,
+    "lookback_days": 180
+   }
+  ],
+  "range_band": [
+   0.1,
+   0.9
+  ],
+  "predictions": [
+   {
+    "trade_id": 8,
+    "date": "2026-10-04",
+    "symbol": "XRP",
+    "expect": "일주일 안에 더 오를 것",
+    "price_then": 193.19,
+    "price_end": 202.03,
+    "change": 0.04575806201149124,
+    "right": true
+   }
+  ],
+  "corrections": [
+   {
+    "what": "XRP 과거 범위 -13.3%–+18.4%",
+    "actual": "실제 +22.1%",
+    "note": "범위 밖. 범위는 예측이 아니라 과거 기록이었다는 점을 다시 적습니다."
+   }
+  ],
+  "decisions": [
+   "10/04 XRP 추가 매수가 '추가 매수 조건' 규칙을 어겼습니다. 이유를 남길까요? 규칙을 바꾸려면 날짜와 이유를 함께 남깁니다.",
+   "코인 비중이 출발 배분보다 +3.2%p 벗어났습니다(점검 기준 ±5%p). 그대로 둘지, 언제 맞출지 미리 적어 둘까요?"
+  ]
+ },
+ "coins": [
+  {
+   "id": "BTC",
+   "label": "비트코인",
+   "weight": 0.006695797514452002,
+   "week_change": 0.006997184060073547
+  },
+  {
+   "id": "ETH",
+   "label": "이더리움",
+   "weight": 0.006324729897877773,
+   "week_change": -0.02961808261886223
+  },
+  {
+   "id": "XRP",
+   "label": "리플",
+   "weight": 0.03923521717523493,
+   "week_change": 0.2207250755287009
+  }
+ ],
+ "trades": [
+  {
+   "id": 1,
+   "date": "2026-09-30",
+   "side": "deposit",
+   "symbol": "KRW",
+   "qty": 10000000.0,
+   "price": 1.0,
+   "fee": 0,
+   "note": "가상 시작 금액"
+  },
+  {
+   "id": 2,
+   "date": "2026-10-01",
+   "side": "buy",
+   "symbol": "주식",
+   "qty": 44496.5128,
+   "price": 89.76,
+   "fee": 1999,
+   "note": "출발 배분 40.0%"
+  },
+  {
+   "id": 3,
+   "date": "2026-10-01",
+   "side": "buy",
+   "symbol": "채권",
+   "qty": 34135.1447,
+   "price": 102.38,
+   "fee": 1749,
+   "note": "출발 배분 35.0%"
+  },
+  {
+   "id": 4,
+   "date": "2026-10-01",
+   "side": "buy",
+   "symbol": "금",
+   "qty": 4488.0517,
+   "price": 111.24,
+   "fee": 250,
+   "note": "출발 배분 5.0%"
+  },
+  {
+   "id": 5,
+   "date": "2026-10-01",
+   "side": "buy",
+   "symbol": "BTC",
+   "qty": 570.8007,
+   "price": 116.62,
+   "fee": 33,
+   "note": "출발 배분 0.7%"
+  },
+  {
+   "id": 6,
+   "date": "2026-10-01",
+   "side": "buy",
+   "symbol": "ETH",
+   "qty": 189.2823,
+   "price": 351.68,
+   "fee": 33,
+   "note": "출발 배분 0.7%"
+  },
+  {
+   "id": 7,
+   "date": "2026-10-01",
+   "side": "buy",
+   "symbol": "XRP",
+   "qty": 403.1663,
+   "price": 165.11,
+   "fee": 33,
+   "note": "출발 배분 0.7%"
+  },
+  {
+   "id": 8,
+   "date": "2026-10-04",
+   "side": "buy",
+   "symbol": "XRP",
+   "qty": 1550.5488,
+   "price": 193.19,
+   "fee": 150,
+   "note": "하루 크게 오른 걸 보고 추가 매수"
+  }
+ ]
+}

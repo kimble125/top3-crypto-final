@@ -1,0 +1,28 @@
+# 데이터: 원본 DB는 올리지 않음 (재수집 가능한 것은 커밋하지 않는다)
+data/raw/*.db
+data/raw/*.db-wal
+data/raw/*.db-shm
+data/interim/
+data/processed/
+
+# 로그
+logs/
+*.log
+
+# 비밀 / 로컬 설정
+.env
+.env.*
+!.env.example
+conf/local/
+credentials.yml
+
+# 캐시
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+venv/
+
+# OS
+.DS_Store

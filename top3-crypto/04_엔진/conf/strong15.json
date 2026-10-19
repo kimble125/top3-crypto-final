@@ -1,0 +1,9 @@
+{
+  "_설명": "공개 저장소용 설정 사본(2026-10-20). 팀 내부 메모는 지웠고, 운영 맥의 경로는 기본 명령 이름으로 바꿨다.",
+  "enabled": true,
+  "lookback_days": 7,
+  "scoring": {
+    "episode_end": "any_change",
+    "aux_horizon_ms": 14400000
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "_설명": "공개 저장소용 설정 사본(2026-10-20). 팀 내부 메모는 지웠고, 운영 맥의 경로는 기본 명령 이름으로 바꿨다. 채점 기준(success_pct)은 예시 값이다(실제 운영 값은 비공개).",
+  "enabled": true,
+  "ban_hours": 12,
+  "success_pct": {
+    "BTCUSDT": 1.0,
+    "ETHUSDT": 1.0,
+    "XRPUSDT": 1.0,
+    "default": 1.0
+  },
+  "fee_pct_per_side": 0.05,
+  "on_time_min": 30,
+  "ai_gate": {
+    "enabled": true,
+    "fresh_hours": 4,
+    "on_demand": true,
+    "on_demand_tries": 1,
+    "on_demand_timeout_sec": 120,
+    "max_delay_min": 45
+  },
+  "ai_schedule_kst_hours": [
+    9,
+    21
+  ],
+  "discord": {
+    "send_official": true
+  },
+  "replay": {
+    "reference_period": [
+      "2018-01-01",
+      "2023-12-31"
+    ],
+    "check_period_start": "2024-01-01"
+  }
+}

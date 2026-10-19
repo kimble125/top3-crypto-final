@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alfredo 대시보드</title>
+<!-- V3 (2026-10-19, 호연 지시): 알프레도 로고('A'의 가로대를 집사 나비넥타이로, 직접 그린 SVG. Top3 로고는 저작권 때문에 뺌), 확신도 %와 7일 선(Top3 V5 따라), 지표 그래프 2/3 · 알프레도 채팅 1/3(GPT, 로컬 서버) -->
+<!-- V2 (2026-10-13, 호연 지시): Top3 Crypto 대시보드를 바탕으로 홈을 '코인'으로 바꾸고 '주식'·'기타'를 더함. AI 분석·공부·설정은 Top3 자리 그대로.
+     data/board.js(build_board.py가 만듦)를 읽어 그린다. 첨부용 한 파일은 dist/alfredo_mvp_board.html. 서버·로그인·바깥 호출 없음 -->
+<style>
+@font-face{font-family:"AlfredoSans";src:url("fonts/AlfredoSans-subset.woff") format("woff");font-weight:45 920;font-display:swap}
+:root{
+  color-scheme:dark;
+  --primary:#2997ff;--ink:#f5f5f7;--ink-80:#d2d2d7;--ink-48:#86868b;
+  --canvas:#000;--parchment:#0d0d0f;--pearl:#1d1d1f;--tile:#161617;--hairline:#2c2c2e;--divider:#262628;
+  --nav:#000;--on-nav:#fff;--nav-muted:#a1a1a6;
+  --up:#ff6b5e;--down:#5ea0ff;--warn:#f0a33c;
+  --c-macd:#b39dff;--c-sto:#f5b942;--c-srsi:#2dd4bf;--c-vpci:#a3e635;
+  --band-bg:#2a2110;--band-ink:#f3d58a;--band-line:#5b4512;
+  --r-sm:8px;--r-md:11px;--r-lg:18px;--r-pill:9999px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo","AlfredoSans",system-ui,sans-serif;
+  --font-d:-apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo","AlfredoSans",system-ui,sans-serif;
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --primary:#0066cc;--ink:#1d1d1f;--ink-80:#333;--ink-48:#6e6e73;
+  --canvas:#fff;--parchment:#f5f5f7;--pearl:#fafafc;--tile:#fff;--hairline:#e0e0e0;--divider:#f0f0f0;
+  --up:#d6342c;--down:#1f6fd0;--warn:#b25e00;
+  --c-macd:#6d4aff;--c-sto:#e07a00;--c-srsi:#0f8f80;--c-vpci:#6f6400;
+  --band-bg:#fff4d6;--band-ink:#5b4300;--band-line:#eda100;
+}
+:root[data-palette="neon"]{--up:#08875c;--down:#c2187a}
+:root[data-palette="neon"][data-theme="dark"]{--up:#2EF9B6;--down:#FF2DAA}
+*{box-sizing:border-box}
+body{margin:0;background:var(--parchment);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.47;letter-spacing:-.374px;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3,h4{margin:0;font-family:var(--font-d);font-weight:600}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none!important}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}.zero{color:var(--ink-48)}
+.top{position:sticky;top:0;z-index:30}
+.gnav{background:var(--nav);color:var(--on-nav)}
+.gnav-in{max-width:1320px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;gap:14px}
+.brand{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.logo{width:26px;height:26px;border-radius:6px;display:block}
+.brand-t{font-family:var(--font-d);font-size:21px;letter-spacing:-.02em;font-weight:800}
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,.14);border-radius:var(--r-pill);padding:3px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+.tabs button{background:none;border:0;color:#e8e8ed;font-size:14px;font-weight:500;padding:5px 16px;border-radius:var(--r-pill);white-space:nowrap;line-height:1.2}
+.tabs button.on{background:#fff;color:#1d1d1f;font-weight:600}
+.ref-line{margin-left:auto;font-size:12px;color:var(--nav-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.band{background:var(--band-bg);color:var(--band-ink);border-bottom:1px solid var(--band-line);padding:6px 16px;font-size:13px;font-weight:600;text-align:center}
+.wrap{max-width:1320px;margin:0 auto;padding:0 16px 60px}
+.mt{margin-top:17px}
+.grid{display:grid;gap:17px;margin-top:17px;align-items:stretch}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(max-width:860px){.g3,.g2{grid-template-columns:minmax(0,1fr)}.brand-t{display:none}}
+.tile{background:var(--tile);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px 24px;display:flex;flex-direction:column;min-width:0}
+.tile-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tile-h h3{font-size:21px}
+.muted{color:var(--ink-48);font-size:14px}
+.fine{font-size:12px;color:var(--ink-48);letter-spacing:-.12px}
+p.fine{margin-top:10px}
+.help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--hairline);color:var(--ink-48);font-size:11px;font-weight:600;position:relative;cursor:help;flex:none}
+.help .tip{display:none;position:absolute;right:0;top:24px;width:min(320px,80vw);background:var(--tile);color:var(--ink-80);border:1px solid var(--hairline);border-radius:var(--r-md);padding:10px 12px;font-size:13px;line-height:1.5;font-weight:400;z-index:25;box-shadow:0 12px 32px -18px rgba(0,0,0,.6);text-align:left}
+.help:hover .tip,.help:focus .tip{display:block}
+.seg{display:flex;gap:2px;background:var(--pearl);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:2px}
+.seg button{background:none;border:0;color:var(--ink-48);font-size:13px;padding:3px 12px;border-radius:var(--r-pill)}
+.seg button.on{background:var(--ink);color:var(--canvas)}
+/* 뉴스 띠 */
+.ticker-line{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--tile);color:var(--ink-80);font-size:13px}
+.tk-tag{font-size:11px;font-weight:600;color:var(--primary);flex:none}
+/* 확신도 카드(Top3 v4) */
+.kcard{cursor:pointer;padding:22px 24px 20px;transition:border-color .15s;text-align:left;font:inherit;color:inherit}
+.kcard:hover{border-color:var(--ink-48)}
+.kcard.sel{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.kc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kc-name{font-size:14px;color:var(--ink-48)}
+.kc-name b{color:var(--ink);font-weight:600;font-size:15px}
+.kc-px{font-size:13px;white-space:nowrap}
+.kc-px b{font-size:17px;font-weight:600}
+.kc-l{font-size:12px;color:var(--ink-48);margin-top:16px}
+.kc-big{font-family:var(--font-d);font-size:58px;font-weight:600;line-height:1.05;letter-spacing:-.02em}
+.kc-lab{font-size:15px;color:var(--ink-80);margin-top:4px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+@media(max-width:860px){.kc-big{font-size:44px}.kcard{padding:16px 18px}}
+:root{--spark:#d2d2d7}:root[data-theme="light"]{--spark:#6e6e73}
+.kcard{padding:22px 24px 18px}
+.kc-mid{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:13px}
+.kc-main{min-width:0}
+.kc-mid .kc-l{margin-top:0;line-height:1.3;font-size:13px}
+.kcard:not(.sel) .kc-l{visibility:hidden}
+.kc-big{display:flex;align-items:baseline;white-space:nowrap}
+.kc-n{font-variant-numeric:tabular-nums}
+.kc-pct{font-size:27px;font-weight:600;margin-left:3px;letter-spacing:0}
+.kc-spark{flex:none;width:161px;max-width:46%;display:flex;flex-direction:column;align-items:flex-end}
+.kc-spark svg{display:block;width:100%;height:auto;overflow:visible;margin-top:2px}
+.kc-spark .line{fill:none;stroke:var(--spark);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.kc-spark .end{fill:var(--ink)}
+.kc-7d{font-size:11px;color:var(--ink-48);margin-top:10px}
+.kc-lab{display:flex;align-items:baseline;gap:8px;margin-top:2px;min-width:0}
+.kc-lbl{flex:none;font-size:15px;color:var(--ink);white-space:nowrap}
+.kc-grp{min-width:0;font-size:13px;color:var(--ink-48);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:860px){.kc-pct{font-size:21px}}
+/* 지표 그래프 2/3 · 알프레도 채팅 1/3 */
+.chart-chat{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:22px;align-items:stretch}
+@media(max-width:1000px){.chart-chat{grid-template-columns:minmax(0,1fr)}}
+.chart-col{min-width:0}
+.chat{display:flex;flex-direction:column;min-width:0;border-left:1px solid var(--divider);padding-left:22px;min-height:420px}
+@media(max-width:1000px){.chat{border-left:0;padding-left:0;border-top:1px solid var(--divider);padding-top:16px}}
+.chat-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.chat-h h3{font-size:19px}
+.chat-log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px 2px;max-height:520px;min-height:200px}
+.msg{max-width:92%;padding:8px 11px;border-radius:12px;font-size:14px;line-height:1.55;white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--pearl);border:1px solid var(--hairline);border-bottom-left-radius:4px}
+.msg.sys{align-self:center;background:none;color:var(--ink-48);font-size:12px;text-align:center}
+.msg .who{display:block;font-size:11px;color:var(--ink-48);margin-bottom:2px}
+.chat-sug{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chat-sug button{border:1px solid var(--hairline);background:var(--pearl);color:var(--ink-80);border-radius:var(--r-pill);padding:4px 10px;font-size:12px}
+.chat-form{display:flex;gap:6px;margin-top:6px}
+.chat-form input{flex:1;min-width:0;background:var(--pearl);border:1px solid var(--hairline);border-radius:var(--r-pill);padding:8px 12px;color:var(--ink);font:inherit;font-size:14px}
+.chat-form button{border:0;background:var(--primary);color:#fff;border-radius:var(--r-pill);padding:8px 14px;font-size:14px;font-weight:600}
+.chat-form button:disabled{opacity:.5;cursor:default}
+.badge{font-size:11px;padding:1px 8px;border-radius:var(--r-pill);border:1px solid var(--hairline);color:var(--ink-48);white-space:nowrap}
+.badge.hi{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.est{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:11px;border:1px dashed var(--warn);color:var(--warn);white-space:nowrap}
+/* 지표 그래프 */
+.chart-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chart-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.ichip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hairline);background:var(--pearl);color:var(--ink);border-radius:var(--r-pill);padding:5px 12px;font-size:13px}
+.ichip.dim{opacity:.42}
+.sw{display:inline-block;width:9px;height:9px;border-radius:50%}
+.ichart{display:block;width:100%;height:auto;font-family:var(--font)}
+.ichart .ax{fill:var(--ink-48);font-size:10.5px}
+.ichart .pane{fill:none;stroke:var(--hairline)}
+.ichart .vgrid{stroke:var(--divider)}
+.ichart .zone{stroke:var(--ink-48);stroke-dasharray:3 4;opacity:.6}
+.ichart .pane-t{fill:var(--ink-80);font-size:12px;font-weight:600;paint-order:stroke;stroke:var(--tile);stroke-width:4px;stroke-linejoin:round}
+.chart-wrap{position:relative}
+.chart-tip{position:absolute;top:8px;left:0;pointer-events:none;background:var(--tile);border:1px solid var(--hairline);border-radius:var(--r-md);padding:8px 10px;font-size:12px;line-height:1.55;box-shadow:0 12px 32px -18px rgba(0,0,0,.6);white-space:nowrap;opacity:0}
+/* 분석 요약 · 근거 */
+.brief-text{margin:6px 0 0;font-size:15px;line-height:1.7}
+.ev-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ev-score{font-size:30px;font-weight:600;line-height:1}
+.ev-lab{font-size:15px;color:var(--ink-80)}
+.evt{width:100%;border-collapse:collapse;font-size:13px}
+.evt td{padding:5px 4px;border-top:1px solid var(--divider);vertical-align:baseline;line-height:1.45}
+.evt .nm{white-space:nowrap;color:var(--ink)}
+.evt .g{color:var(--ink-48);font-size:11px;margin-right:4px}
+.evt .w{color:var(--ink-48);font-size:11px;margin-left:4px}
+.evt .nt{color:var(--ink-80)}
+.evt .dx{text-align:right;white-space:nowrap;font-weight:600}
+.evt tr.off td{color:var(--ink-48);font-weight:400}
+.formula{margin-top:8px;font-size:12px;color:var(--ink-80);background:var(--pearl);border-radius:var(--r-sm);padding:6px 10px;line-height:1.5}
+/* 공부·설정 */
+.study-doc{font-size:15px;line-height:1.7}
+.study-doc h2{font-size:20px;margin:22px 0 8px;padding-top:12px;border-top:1px solid var(--divider)}
+.study-doc h2:first-child{border-top:0;margin-top:0;padding-top:0}
+.study-doc ul,.study-doc ol{margin:6px 0 6px 22px;padding:0}
+.study-doc dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:6px 0}
+.study-doc dt{font-weight:600}
+.study-doc dd{margin:0;color:var(--ink-80)}
+@media(max-width:600px){.study-doc dl{grid-template-columns:minmax(0,1fr)}}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--divider);font-size:15px;flex-wrap:wrap}
+.set-row:first-of-type{border-top:0}
+.foot{margin-top:28px;font-size:12px;color:var(--ink-48);line-height:1.6}
+.alert{padding:12px 16px;border-radius:var(--r-md);border:1px solid var(--warn);color:var(--warn)}
+@media(max-width:700px){
+  .gnav-in{gap:8px;padding:0 12px}.tabs{margin-left:0}.tabs button{padding:5px 11px;font-size:13px}
+  .ref-line{display:none}.wrap{padding:0 12px 48px}.tile{padding:16px;border-radius:var(--r-md)}
+  .tile-h h3{font-size:18px}.kc-big{font-size:40px}.kc-l{margin-top:8px}
+  #ev-body .evt{min-width:460px}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <header class="gnav">
+    <div class="gnav-in">
+      <span class="brand"><svg class="logo" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true" focusable="false"><defs><linearGradient id="alf-logo-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2997ff"/><stop offset="1" stop-color="#5856d6"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#alf-logo-g)"/><path d="M8.8 25 16 7 23.2 25" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.4 14.9 15 17.6 15 18.4 10.4 21.1Z M21.6 14.9 17 17.6 17 18.4 21.6 21.1Z" fill="#ffd166" stroke="#ffd166" stroke-width=".9" stroke-linejoin="round"/><rect x="14.6" y="16.4" width="2.8" height="3.2" rx="1" fill="#ffb703"/></svg><span class="brand-t">Alfredo</span></span>
+      <nav class="tabs" role="tablist" aria-label="화면">
+        <button role="tab" data-view="coin">코인</button>
+        <button role="tab" data-view="stock">주식</button>
+        <button role="tab" data-view="other">기타</button>
+        <button role="tab" data-view="ai">AI 분석</button>
+        <button role="tab" data-view="study">공부</button>
+        <button role="tab" data-view="settings">설정</button>
+      </nav>
+      <span class="ref-line" id="ref-line"></span>
+    </div>
+  </header>
+  <div class="band" id="band" role="note">AI가 만든 정보이며 투자 권유가 아닙니다. 모의투자 기준입니다.</div>
+</div>
+
+<main class="wrap" id="app">
+  <!-- 코인·주식·기타: Top3 홈과 같은 꼴(뉴스 띠 → 확신도 카드 3개 → 지표 그래프 → 분석 요약 · 근거) -->
+  <section id="view-dash">
+    <div class="mt"><div class="ticker-line"><span class="tk-tag">뉴스</span><span id="tk"></span></div></div>
+    <div class="grid g3" id="cards" role="group" aria-label="자산 고르기"></div>
+    <article class="tile mt" id="chart-tile">
+     <div class="chart-chat">
+      <div class="chart-col">
+      <div class="tile-h"><h3 id="chart-title">지표 그래프</h3>
+        <div class="chart-tools">
+          <span class="fine num" id="chart-hilo"></span>
+          <div class="seg" id="chart-range" role="group" aria-label="기간"><button data-n="30">1개월</button><button data-n="90" class="on">3개월</button><button data-n="180">6개월</button></div>
+          <span class="help" tabindex="0">i<span class="tip">합성 일봉으로 그린 지표입니다. 가격 칸의 점선은 50일선, 흐린 선은 200일선입니다. RSI는 참고로만 그리고 확신도 점수에는 넣지 않습니다(퀀트 강의 Part 1: RSI 돌파 전략은 단순 보유보다 못했음).</span></span>
+        </div>
+      </div>
+      <div class="chart-chips" id="chart-chips"></div>
+      <div class="chart-wrap"><div id="chart-svg"></div><div class="chart-tip" id="chart-tip"></div></div>
+      <p class="fine">단위가 다른 지표는 각자 눈금입니다. 선이 만나는 높이보다 방향과 교차 시점을 보세요.</p>
+      </div>
+      <aside class="chat" id="chat" aria-label="알프레도와 대화">
+        <div class="chat-h"><h3>알프레도에게 묻기</h3><span class="fine">AI 에이전트 · GPT</span></div>
+        <p class="fine" id="chat-note" style="margin-top:0"></p>
+        <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
+        <div class="chat-sug" id="chat-sug"></div>
+        <form class="chat-form" id="chat-form" autocomplete="off">
+          <input id="chat-in" maxlength="500" placeholder="이 화면에 대해 물어보세요" aria-label="질문">
+          <button type="submit" id="chat-send">보내기</button>
+        </form>
+      </aside>
+     </div>
+    </article>
+    <div class="grid g2">
+      <article class="tile" id="brief">
+        <div class="tile-h"><h3>분석 요약</h3><span class="fine" id="brief-meta"></span></div>
+        <div id="brief-body"></div>
+      </article>
+      <article class="tile" id="evidence">
+        <div class="tile-h"><h3>근거</h3><span class="fine" id="ev-meta"></span>
+          <span class="help" tabindex="0">i<span class="tip" id="method"></span></span>
+        </div>
+        <div id="ev-body"></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- AI 분석: Top3 자리 그대로(이번 MVP에서는 손대지 않음) -->
+  <section id="view-ai" hidden>
+    <article class="tile mt study-doc">
+      <h2>AI 분석</h2>
+      <p>Top3 Crypto의 'AI 분석' 탭과 같은 자리입니다. 이번 MVP에서는 손대지 않았습니다.</p>
+      <ul>
+        <li>코인: Top3 공개 화면의 AI 분석을 그대로 봅니다. <a id="top3-link" target="_blank" rel="noopener noreferrer">Top3 공개 화면 ↗</a></li>
+        <li>주식·기타: 같은 꼴로 붙일 자리입니다. AI가 따로 판단하는 분석에는 코드의 판정(확신도)을 주지 않고 숫자와 사실만 줍니다. 채팅의 알프레도는 화면의 계산 결과를 설명만 합니다.</li>
+        <li>AI가 낸 추정치에는 'AI 추정'을 붙입니다. 지금 화면의 정성 신호는 AI 연결 전 예시값입니다.</li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- 공부: Top3 공부 노트 자리 + 알프레도 낱말 풀이 -->
+  <section id="view-study" hidden>
+    <article class="tile mt study-doc">
+      <h2>사용 방법</h2>
+      <ol>
+        <li>위 탭에서 <b>코인 · 주식 · 기타</b>를 고릅니다. 세 탭은 같은 꼴입니다.</li>
+        <li><b>확신도 카드</b>를 누르면 아래 지표 그래프와 분석 요약 · 근거가 그 자산으로 바뀝니다.</li>
+        <li><b>근거</b> 칸에서 신호마다 읽은 값과 방향, 계산식을 봅니다.</li>
+        <li>맨 위 띠처럼, 모든 숫자는 정보이며 투자 권유가 아닙니다. 사고팔 시점은 사용자가 정합니다.</li>
+      </ol>
+      <h2>낱말 풀이</h2>
+      <dl>
+        <dt>확신도</dt><dd>여러 신호가 같은 방향을 가리키는 정도(−100–+100)입니다. 확률이나 추천이 아닙니다.</dd>
+        <dt>기술적 신호</dt><dd>가격과 이동평균·MACD처럼 가격 움직임에서 읽는 신호입니다.</dd>
+        <dt>정량 신호</dt><dd>일정 기간 수익률(시계열 모멘텀)처럼 숫자 규칙으로 읽는 신호입니다. 퀀트 강의의 팩터 개념을 참고했습니다.</dd>
+        <dt>정성 신호</dt><dd>뉴스·시황을 읽은 해석입니다. AI가 낼 자리이고, 지금은 예시값이라 'AI 추정(예시)'로 표시합니다.</dd>
+        <dt>변동성 국면</dt><dd>최근 20일 변동성이 지난 1년 보통 수준보다 높은지 낮은지입니다. 방향이 아니라서 점수에 넣지 않습니다.</dd>
+        <dt>합성 가격</dt><dd>실제 시세가 아니라 정해진 규칙으로 만든 시연용 가격입니다.</dd>
+        <dt>기타</dt><dd>금·채권·달러처럼 주식·코인 밖의 자산입니다. '안전 자산'이라는 말은 권유로 읽힐 수 있어 쓰지 않습니다.</dd>
+      </dl>
+      <h2>Top3 공부 노트</h2>
+      <p>코인·지표·규제 공부 노트는 Top3 공개 화면의 '공부' 탭에 있습니다. 이번 MVP에서는 손대지 않았습니다.</p>
+    </article>
+  </section>
+
+  <!-- 설정: 이 화면 안에서만 바뀜(저장하지 않음) -->
+  <section id="view-settings" hidden>
+    <div class="grid g2">
+      <article class="tile">
+        <h3>화면</h3>
+        <div class="set-row"><span>테마</span><div class="seg" data-set="theme"><button data-v="dark">어둡게</button><button data-v="light">밝게</button></div></div>
+        <div class="set-row"><span>상승·하락 색</span><div class="seg" data-set="palette"><button data-v="kr">빨강·파랑</button><button data-v="neon">민트·마젠타</button></div></div>
+      </article>
+      <article class="tile">
+        <h3>정보</h3>
+        <p class="fine" id="info"></p>
+      </article>
+    </div>
+  </section>
+
+  <footer class="foot"><p id="foot"></p></footer>
+</main>
+
+<script src="data/board.js"></script>
+<script>
+(function () {
+  "use strict";
+  const D = window.ALFREDO_BOARD;
+  const $ = (id) => document.getElementById(id);
+  if (!D) { $("app").innerHTML = '<p class="alert mt">데이터를 찾지 못했습니다. board.html과 data 폴더를 같은 곳에 두고 여세요.</p>'; return; }
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const minus = (s) => String(s).replace(/(^|[^\d])-(?=\d)/g, "$1−");
+  const f2 = (x) => Number(x).toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const sgn = (x) => (x > 0 ? "up" : x < 0 ? "down" : "zero");
+  const scoreTxt = (c) => (c.score == null ? "보류" : c.score === 0 ? "0" : minus((c.score > 0 ? "+" : "") + c.score));
+  const ARW = (x) => x == null ? ["–", "zero"] : x > 0 ? ["▲ " + minus("+" + x), "up"] : x < 0 ? ["▼ " + minus(String(x)), "down"] : ["· 0", "zero"];
+  const M = D.meta;
+  $("band").textContent = M.band;
+  $("ref-line").textContent = `합성 일봉 · ${M.end.slice(5).replace("-", "/")} 종가 기준`;
+  $("method").textContent = M.method;
+  $("top3-link").href = M.top3_url;
+  $("info").textContent = `${M.price_note} 확신도는 알프레도 v0 방식(가중치 모두 1)이며 Top3의 조원 기준 가중치를 쓰지 않습니다. ${M.version} · 만든 시각 ${M.built_at.replace("T", " ").slice(0, 16)} UTC · 글꼴 Pretendard(SIL OFL 1.1)에서 쓰는 글자만 넣음.`;
+  $("foot").textContent = `가격은 합성값입니다(실제 시세 아님). 확신도는 신호 일치도이며 확률·추천이 아닙니다. ${M.version}`;
+
+  let tab = "coin", sel = {}, days = 90;
+  const T = () => D.tabs[tab];
+  const A = () => T().assets.find((a) => a.id === sel[tab]) || T().assets[0];
+
+  // ---- 탭 ----
+  const DASH = ["coin", "stock", "other"];
+  function show(v) {
+    if (!["coin", "stock", "other", "ai", "study", "settings"].includes(v)) v = "coin";
+    $("view-dash").hidden = !DASH.includes(v);
+    ["ai", "study", "settings"].forEach((x) => { $("view-" + x).hidden = x !== v; });
+    document.querySelectorAll(".tabs button").forEach((b) => { const on = b.dataset.view === v; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+    if (DASH.includes(v)) { tab = v; renderAll(); }
+  }
+  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => { show(b.dataset.view); history.replaceState(null, "", "#" + b.dataset.view); }));
+
+  // ---- 설정 ----
+  function setOpt(k, v) {
+    if (k === "theme") document.documentElement.dataset.theme = v;
+    if (k === "palette") document.documentElement.dataset.palette = v;
+    document.querySelectorAll(`[data-set="${k}"] button`).forEach((b) => b.classList.toggle("on", b.dataset.v === v));
+  }
+  document.querySelectorAll("[data-set] button").forEach((b) => b.addEventListener("click", () => setOpt(b.closest("[data-set]").dataset.set, b.dataset.v)));
+  setOpt("theme", "dark"); setOpt("palette", "kr");
+
+  // ---- 확신도 카드(Top3 V5: 우세 쪽 %, 54% 이하는 중립 회색) ----
+  const pctCls = (c) => (c.side_pct == null || c.side_pct <= 54 ? "zero" : c.side === "상승" ? "up" : "down");
+  function spark(v) {
+    const W = 161, H = 62, lo = Math.min(...v), hi = Math.max(...v), r = hi - lo || 1;
+    const pts = v.map((y, i) => [(i * (W - 6)) / (v.length - 1) + 1, 4 + ((hi - y) * (H - 8)) / r]);
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
+    const e = pts[pts.length - 1];
+    return `<div class="kc-spark"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 7일 가격(합성)"><path class="line" d="${d}"/><circle class="end" cx="${e[0].toFixed(1)}" cy="${e[1].toFixed(1)}" r="3"/></svg><span class="kc-7d">7일</span></div>`;
+  }
+  function renderCards() {
+    $("tk").textContent = `${T().name} 뉴스 제목·링크가 들어올 자리입니다(연결 전). ${T().note}`;
+    $("cards").innerHTML = T().assets.map((a) => {
+      const on = a.id === A().id, c = a.conf;
+      return `<button type="button" class="tile kcard${on ? " sel" : ""}" data-id="${esc(a.id)}" aria-pressed="${on}">
+        <div class="kc-top"><span class="kc-name"><b>${esc(a.id)}</b> · ${esc(a.name)}</span>
+          <span class="kc-px"><b class="num">${f2(a.price)}</b> <span class="num ${sgn(a.chg)}">${minus((a.chg > 0 ? "+" : "") + f2(a.chg))} (${minus((a.chg_pct > 0 ? "+" : "") + (a.chg_pct * 100).toFixed(2))}%)</span></span></div>
+        <div class="kc-mid">
+          <div class="kc-main"><div class="kc-l">확신도</div>
+            <div class="kc-big num ${pctCls(c)}"><span class="kc-n">${c.side_pct == null ? "–" : c.side_pct}</span>${c.side_pct == null ? "" : '<span class="kc-pct">%</span>'}</div></div>
+          ${spark(a.spark)}
+        </div>
+        <div class="kc-lab"><span class="kc-lbl">${esc(c.label)}</span><span class="kc-grp" title="${esc(a.sub)} · 변동성 ${esc(a.badge.regime)}">${esc(a.sub)} · 변동성 ${esc(a.badge.regime)}</span></div>
+      </button>`;
+    }).join("");
+    document.querySelectorAll("#cards .kcard").forEach((el) => el.addEventListener("click", () => {
+      if (sel[tab] === el.dataset.id) return;
+      sel[tab] = el.dataset.id; renderAll();
+      const again = document.querySelector(`#cards .kcard[data-id="${el.dataset.id}"]`); if (again) again.focus({ preventScroll: true });
+    }));
+  }
+
+  // ---- 지표 그래프: 가격·이동평균 / MACD / RSI ----
+  const PANES = [
+    { k: "price", n: "가격 · 일봉 종가", c: "var(--ink-80)" },
+    { k: "macd", n: "MACD", tf: "일봉", c: "var(--c-macd)" },
+    { k: "rsi", n: "RSI", tf: "14일 · 점수 제외", c: "var(--c-srsi)" },
+  ];
+  function renderChart() {
+    const a = A(), S = a.series, n = Math.min(days, S.c.length), off = S.c.length - n;
+    const cut = (arr) => arr.slice(off);
+    const d = cut(S.d), c = cut(S.c), s50 = cut(S.s50), s200 = cut(S.s200), m = cut(S.macd), sg = cut(S.sig), r = cut(S.rsi);
+    $("chart-title").textContent = `지표 그래프 · ${a.id}`;
+    $("chart-hilo").textContent = `하루 고가 ${f2(a.hi_1d)} · 저가 ${f2(a.lo_1d)}`;
+    $("chart-chips").innerHTML = PANES.map((p) => `<span class="ichip"><span class="sw" style="background:${p.c}"></span>${p.n}${p.tf ? ` <span class="fine">${p.tf}</span>` : ""}</span>`).join("");
+    const W = Math.max(300, $("chart-svg").clientWidth || 900), narrow = W < 560;
+    const ml = 8, mr = narrow ? 44 : 60, top = 10, ph = [narrow ? 130 : 170, narrow ? 80 : 100, narrow ? 80 : 100], gap = 16, bot = 22;
+    const H = top + ph.reduce((s, x) => s + x, 0) + gap * 2 + bot;
+    const x = (i) => ml + (i * (W - ml - mr)) / Math.max(1, n - 1);
+    let g = "", y0 = top;
+    const line = (vals, yf, color, w = 1.6, dash = "") => {
+      let p = "", on = false;
+      vals.forEach((v, i) => { if (v == null) { on = false; return; } p += `${on ? "L" : "M"}${x(i).toFixed(1)},${yf(v).toFixed(1)}`; on = true; });
+      return `<path d="${p}" fill="none" stroke="${color}" stroke-width="${w}" ${dash ? `stroke-dasharray="${dash}"` : ""} stroke-linejoin="round"/>`;
+    };
+    const ticks = narrow ? 4 : 6;
+    for (let k = 0; k <= ticks; k++) { const i = Math.round((k * (n - 1)) / ticks); g += `<line class="vgrid" x1="${x(i)}" x2="${x(i)}" y1="${top}" y2="${H - bot}"/><text class="ax" x="${x(i)}" y="${H - 6}" text-anchor="${k === 0 ? "start" : k === ticks ? "end" : "middle"}">${d[i].slice(5).replace("-", "/")}</text>`; }
+    const scales = [];
+    // 가격
+    { const vals = c.concat(s50.filter((v) => v != null), s200.filter((v) => v != null)); let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+      const yf = (v) => y0 + ((hi - v) * ph[0]) / (hi - lo); scales.push(yf);
+      g += `<rect class="pane" x="${ml}" y="${y0}" width="${W - ml - mr}" height="${ph[0]}" rx="4"/>`;
+      g += line(s200, yf, "var(--ink-48)", 1.2) + line(s50, yf, "var(--c-sto)", 1.2, "4 3") + line(c, yf, "var(--ink-80)", 1.6);
+      g += `<text class="ax" x="${W - mr + 6}" y="${y0 + 10}">${f2(hi)}</text><text class="ax" x="${W - mr + 6}" y="${y0 + ph[0] - 2}">${f2(lo)}</text>`;
+      g += `<text class="pane-t" x="${ml + 8}" y="${y0 + 16}">가격 <tspan class="fine" fill="var(--c-sto)">50일선</tspan> <tspan fill="var(--ink-48)">200일선</tspan></text>`; y0 += ph[0] + gap; }
+    // MACD
+    { const vals = m.concat(sg); const lim = Math.max(...vals.map(Math.abs)) * 1.1 || 1; const yf = (v) => y0 + ((lim - v) * ph[1]) / (2 * lim); scales.push(yf);
+      g += `<rect class="pane" x="${ml}" y="${y0}" width="${W - ml - mr}" height="${ph[1]}" rx="4"/><line class="zone" x1="${ml}" x2="${W - mr}" y1="${yf(0)}" y2="${yf(0)}"/>`;
+      g += line(sg, yf, "var(--c-macd)", 1.1, "4 3") + line(m, yf, "var(--c-macd)", 1.7);
+      g += `<text class="ax" x="${W - mr + 6}" y="${y0 + 10}">${minus("+" + lim.toFixed(2))}</text><text class="ax" x="${W - mr + 6}" y="${y0 + ph[1] - 2}">${minus("-" + lim.toFixed(2))}</text>`;
+      g += `<text class="pane-t" x="${ml + 8}" y="${y0 + 16}" fill="var(--c-macd)">MACD 일봉</text>`; y0 += ph[1] + gap; }
+    // RSI
+    { const yf = (v) => y0 + ((100 - v) * ph[2]) / 100; scales.push(yf);
+      g += `<rect class="pane" x="${ml}" y="${y0}" width="${W - ml - mr}" height="${ph[2]}" rx="4"/>`;
+      [30, 70].forEach((v) => { g += `<line class="zone" x1="${ml}" x2="${W - mr}" y1="${yf(v)}" y2="${yf(v)}"/><text class="ax" x="${W - mr + 6}" y="${yf(v) + 4}">${v}</text>`; });
+      g += line(r, yf, "var(--c-srsi)", 1.6) + `<text class="pane-t" x="${ml + 8}" y="${y0 + 16}" fill="var(--c-srsi)">RSI 14일 · 점수 제외</text>`; }
+    g += `<line id="hl" y1="${top}" y2="${H - bot}" stroke="var(--ink-48)" opacity="0"/><rect id="hit" x="${ml}" y="0" width="${W - ml - mr}" height="${H}" fill="transparent"/>`;
+    $("chart-svg").innerHTML = `<svg class="ichart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(a.id)} 지표 그래프">${g}</svg>`;
+    const svg = $("chart-svg").querySelector("svg"), tip = $("chart-tip");
+    const move = (e) => {
+      const rc = svg.getBoundingClientRect(), sx = ((e.clientX - rc.left) * W) / rc.width;
+      const i = Math.max(0, Math.min(n - 1, Math.round(((sx - ml) * (n - 1)) / (W - ml - mr))));
+      const hl = svg.querySelector("#hl"); hl.setAttribute("x1", x(i)); hl.setAttribute("x2", x(i)); hl.setAttribute("opacity", 1);
+      tip.innerHTML = `<b>${d[i]}</b><br>종가 ${f2(c[i])}${s50[i] != null ? ` · 50일선 ${f2(s50[i])}` : ""}<br>MACD ${minus(m[i].toFixed(3))} / 시그널 ${minus(sg[i].toFixed(3))}<br>RSI ${r[i] == null ? "–" : r[i].toFixed(1)}`;
+      const left = (x(i) / W) * rc.width; tip.style.left = Math.max(0, Math.min(left + 12, rc.width - tip.offsetWidth - 4)) + "px"; tip.style.opacity = 1;
+    };
+    const hit = svg.querySelector("#hit");
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", () => { tip.style.opacity = 0; svg.querySelector("#hl").setAttribute("opacity", 0); });
+  }
+  document.querySelectorAll("#chart-range button").forEach((b) => b.addEventListener("click", () => {
+    days = +b.dataset.n; document.querySelectorAll("#chart-range button").forEach((x) => x.classList.toggle("on", x === b)); renderChart();
+  }));
+
+  // ---- 분석 요약 · 근거 ----
+  function renderBrief() {
+    const a = A();
+    $("brief-meta").textContent = `${a.id} · 코드가 신호로 쓴 문장 · AI 분석 연결 전`;
+    $("brief-body").innerHTML = `<p class="brief-text">${esc(minus(a.summary))}</p>`;
+  }
+  function renderEvidence() {
+    const a = A(), c = a.conf;
+    $("ev-meta").textContent = `${a.id} · ${M.end.slice(5).replace("-", "/")} 종가 자료`;
+    const rows = a.signals.map((s) => {
+      const [t, k] = ARW(s.x);
+      const est = s.group === "정성" ? '<span class="est">AI 추정(예시)</span>' : "";
+      return `<tr class="${s.x == null ? "off" : ""}"><td class="nm"><span class="g">${esc(s.group)}</span>${esc(s.name)}<span class="w">×1</span></td><td class="nt">${esc(s.tf === "AI 추정(예시)" ? "" : s.tf + " · ")}${esc(minus(s.note))}${est}</td><td class="dx ${k}">${t}</td></tr>`;
+    }).join("") + `<tr class="off"><td class="nm"><span class="g">정량</span>변동성 국면</td><td class="nt">20일 연환산 ${(a.badge.vol20 * 100).toFixed(0)}% · 1년 중앙값 ${(a.badge.vol_med * 100).toFixed(0)}% → ${esc(a.badge.regime)}</td><td class="dx">제외</td></tr>`;
+    $("ev-body").innerHTML = `<div class="ev-top"><span class="ev-score num ${pctCls(c)}">${c.side_pct == null ? "–" : c.side_pct + "%"}</span><span class="ev-lab">${esc(c.label)}</span><span class="fine">점수 ${scoreTxt(c)} · 자료 ${Math.round(c.coverage * 100)}%</span></div>
+      <div style="overflow-x:auto"><table class="evt">${rows}</table></div><div class="formula num">${esc(minus(c.formula))}</div>`;
+  }
+  function renderAll() { renderCards(); renderChart(); renderBrief(); renderEvidence(); renderSug(); }
+
+  // ---- 알프레도 채팅(GPT): mvp/chat_server.py가 켜진 로컬 주소에서만 묻는다. 파일로 연 화면은 안내만 ----
+  const chat = [];   // 이 화면 안에서만 둔다(저장하지 않음)
+  $("chat-note").textContent = M.chat_note;
+  const SUG = ["이 확신도는 어떻게 계산했어?", "변동성 국면이 뭐야?", "근거에서 엇갈리는 신호는?"];
+  function renderSug() { $("chat-sug").innerHTML = SUG.map((q) => `<button type="button">${esc(q)}</button>`).join(""); }
+  function addMsg(who, text) {
+    const el = document.createElement("div");
+    el.className = "msg " + who;
+    el.innerHTML = (who === "ai" ? '<span class="who">알프레도 · AI 답</span>' : "") + esc(minus(text));
+    $("chat-log").appendChild(el); $("chat-log").scrollTop = $("chat-log").scrollHeight;
+    return el;
+  }
+  addMsg("ai", "안녕하세요, 알프레도입니다. 지금 고른 자산의 확신도·근거·지표를 쉬운 말로 풀어 드립니다. 사고팔 시점은 정해 드리지 않습니다.");
+  async function ask(q) {
+    q = String(q || "").trim().slice(0, 500);
+    if (!q) return;
+    addMsg("me", q); $("chat-in").value = "";
+    if (location.protocol === "file:") {
+      addMsg("sys", "파일로 연 화면이라 GPT에 연결하지 않았습니다. 맥에서 python3 -I mvp/chat_server.py를 켜고 http://127.0.0.1:8787 로 열면 대화할 수 있습니다.");
+      return;
+    }
+    const wait = addMsg("sys", "알프레도가 답을 쓰는 중입니다…");
+    $("chat-send").disabled = true;
+    try {
+      const r = await fetch("api/chat", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tab, asset: A().id, message: q, history: chat.slice(-6) }) });
+      const j = await r.json();
+      wait.remove();
+      if (!r.ok) throw new Error(j.error || r.status);
+      addMsg("ai", j.answer);
+      if (j.flagged) addMsg("sys", "권유로 읽힐 표현이 있어 답을 정보 안내로 바꿨습니다.");
+      chat.push({ role: "user", text: q }, { role: "ai", text: j.answer });
+    } catch (e) {
+      wait.remove(); addMsg("sys", "답을 받지 못했습니다: " + String(e.message || e).slice(0, 120));
+    } finally { $("chat-send").disabled = false; }
+  }
+  $("chat-form").addEventListener("submit", (e) => { e.preventDefault(); ask($("chat-in").value); });
+  $("chat-sug").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) ask(b.textContent); });
+  let rz = 0, lastW = 0;
+  window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { const w = $("chart-svg").clientWidth; if (w && w !== lastW && !$("view-dash").hidden) { lastW = w; renderChart(); } }, 150); });
+
+  show((location.hash || "#coin").slice(1));
+})();
+</script>
+</body>
+</html>

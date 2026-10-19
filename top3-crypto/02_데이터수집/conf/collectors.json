@@ -1,0 +1,225 @@
+{
+  "_comment": "수집 대상 설정. 코드가 아니라 여기만 고치면 됩니다. 확인일 2026-09-22.",
+  "enabled": {
+    "_comment_1012": "2026-10-12 호연: 정미님 6대 분류 AI 분석 5절(OI·코인베이스 프리미엄) 재료로 binance_window(OI·롱숏·테이커, 30일 창)와 candles_coinbase 를 다시 켬. 트리거·확신도에는 쓰지 않는다.",
+    "_comment": "2026-10-03, 2차 회의 D1·D2. 확신도 재료는 바이낸스 현물 캔들(15m·1h·4h)뿐이고 보조는 공포탐욕지수·뉴스. 꺼진 항목의 코드와 쌓인 데이터는 남겨 둠. 백필 옵션(--funding-backfill 등)을 주면 꺼져 있어도 실행됨. 뉴스는 10-03부터 공식 API(네이버·GDELT)만 15분마다 수집, 매체 RSS는 꺼 둠(--news-once로 1회 비교 수집 가능).",
+    "binance_window": true,
+    "bybit_oi": false,
+    "funding": false,
+    "candles_binance": true,
+    "candles_upbit": false,
+    "candles_coinbase": true,
+    "fear_greed": true,
+    "news": true
+  },
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "XRPUSDT"
+  ],
+  "periods": [
+    "4h",
+    "1h"
+  ],
+  "request_sleep_sec": 0.25,
+  "timeout_sec": 25,
+  "retries": 3,
+  "binance_window_endpoints": {
+    "_comment": "전부 약 30일치만 반환됩니다. 그래서 적립이 필요합니다.",
+    "open_interest": {
+      "path": "openInterestHist",
+      "fields": {
+        "oi_base": "sumOpenInterest",
+        "oi_value_usd": "sumOpenInterestValue"
+      }
+    },
+    "global_long_short_account": {
+      "_comment": "전체 계정 기준. metric 이름은 엔드포인트별로 반드시 달라야 합니다(기본키가 metric을 포함하므로 같으면 덮어씁니다).",
+      "path": "globalLongShortAccountRatio",
+      "fields": {
+        "global_acc_long_short_ratio": "longShortRatio",
+        "global_acc_long_pct": "longAccount",
+        "global_acc_short_pct": "shortAccount"
+      }
+    },
+    "top_long_short_position": {
+      "_comment": "상위 트레이더 '포지션 규모' 기준",
+      "path": "topLongShortPositionRatio",
+      "fields": {
+        "top_pos_long_short_ratio": "longShortRatio",
+        "top_pos_long_pct": "longAccount",
+        "top_pos_short_pct": "shortAccount"
+      }
+    },
+    "top_long_short_account": {
+      "_comment": "상위 트레이더 '계정 수' 기준",
+      "path": "topLongShortAccountRatio",
+      "fields": {
+        "top_acc_long_short_ratio": "longShortRatio",
+        "top_acc_long_pct": "longAccount",
+        "top_acc_short_pct": "shortAccount"
+      }
+    },
+    "taker_long_short": {
+      "path": "takerlongshortRatio",
+      "fields": {
+        "buy_sell_ratio": "buySellRatio",
+        "buy_vol": "buyVol",
+        "sell_vol": "sellVol"
+      }
+    }
+  },
+  "bybit": {
+    "category": "linear",
+    "interval_map": {
+      "4h": "4h",
+      "1h": "1h"
+    }
+  },
+  "funding": {
+    "_comment": "펀딩비는 전체 이력이 무료로 열려 있습니다(BTC 2019-09-10~). 증분 수집만 하면 됩니다.",
+    "binance_first_ms": 1500000000000,
+    "page_limit": 1000
+  },
+  "candles": {
+    "_comment": "캔들(OHLCV). 셋 다 전체 이력 무료. 미완성 봉은 저장하지 않음. 확인일 2026-09-28.",
+    "binance": {
+      "_comment": "현물. 2017-08-17~. 1000건/요청. 2026-10-03부터 15m·1h·4h(지표 시간대: VPCI 15m, Stochastic·StochRSI 1h, MACD 4h). 1d는 수집 중단(쌓인 값은 보존).",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "XRPUSDT"
+      ],
+      "periods": [
+        "15m",
+        "1h",
+        "4h"
+      ],
+      "first_ms": 1500000000000,
+      "page_limit": 1000
+    },
+    "upbit": {
+      "_comment": "원화. 2017-09-25~. 200건/요청, 캔들 그룹 초당 10회 제한 → 0.15초 간격.",
+      "markets": [
+        "KRW-BTC",
+        "KRW-ETH",
+        "KRW-XRP"
+      ],
+      "periods": {
+        "4h": "minutes/240",
+        "1d": "days"
+      },
+      "count": 200,
+      "request_sleep_sec": 0.15,
+      "max_pages": 400
+    },
+    "coinbase": {
+      "_comment": "공개 v3 API(api.coinbase.com). 구 exchange API 는 4h 미지원. 요청당 350건 미만 → 300 사용. 상품별 시작일은 코인베이스 상장 무렵(상장 전·거래 중단 구간은 오류/빈 응답을 건너뜀). 코인베이스 프리미엄 = (코인베이스 종가 − 바이낸스 종가)/바이낸스 종가.",
+      "products": {
+        "BTC-USD": "2015-01-01T00:00:00Z",
+        "ETH-USD": "2016-05-01T00:00:00Z",
+        "XRP-USD": "2019-02-01T00:00:00Z"
+      },
+      "periods": [
+        "4h",
+        "1d"
+      ],
+      "max_candles": 300,
+      "request_sleep_sec": 0.15
+    }
+  },
+  "fear_greed": {
+    "_comment": "alternative.me 공포탐욕지수. 하루 1회 UTC 00:00 갱신(2026-10-03 실측). DB가 비었을 때만 limit=0(2018-02-01~ 전량), 평소엔 최근 10건. 표시할 때 데이터 바로 옆에 출처(alternative.me) 표기 필수.",
+    "url": "https://api.alternative.me/fng/?limit=0",
+    "url_incremental": "https://api.alternative.me/fng/?limit=10"
+  },
+  "news": {
+    "_comment": "뉴스 헤드라인(제목·링크·발행 시각·언론사만). 2026-10-03 호연 지시로 자동 수집을 켬. 공식 API만 상시 사용: 네이버 뉴스 검색 API(하루 25,000회 무료, .env NAVER_CLIENT_ID·SECRET 필요, 키 없으면 건너뜀), GDELT DOC 2.0(무료 공개, 출처 표기, 5초에 1회 제한). 매체 RSS 6곳과 Google 뉴스 RSS는 약관 제한으로 꺼 둠(enabled=false), --news-once 로만 1회 비교 수집. 근거: 08_참고자료/기획서ver3_공식근거_2026-10-03.md Q8, 01_운영/Plan/기획서/기획서 ver3.md §6.",
+    "min_interval_min": 55,
+    "request_sleep_sec": 1.0,
+    "feeds": [
+      {
+        "name": "naver_news",
+        "retain_days": 21,
+        "_retain_days": "네이버 검색 API 약관 특약 2.4(2026-09-07 시행): 서버 보관은 이력 조회 목적으로 최대 21일. 지난 행은 수집 때마다 지운다(2026-10-20).",
+        "type": "naver",
+        "lang": "ko",
+        "enabled": true,
+        "min_interval_min": 14,
+        "display": 20,
+        "queries": [
+          "비트코인",
+          "이더리움",
+          "리플 XRP"
+        ]
+      },
+      {
+        "name": "gdelt",
+        "type": "gdelt",
+        "lang": "en",
+        "enabled": true,
+        "min_interval_min": 30,
+        "query": "(bitcoin OR ethereum OR xrp OR ripple OR crypto)",
+        "timespan": "3h",
+        "maxrecords": 50,
+        "_note": "10-03 이 맥(공용 망으로 보임)에서 429·'5초에 1회' 거절이 이어짐. 실패해도 수집기는 계속, 30분 간격으로 다시 시도"
+      },
+      {
+        "name": "coindesk",
+        "lang": "en",
+        "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "cointelegraph",
+        "lang": "en",
+        "url": "https://cointelegraph.com/rss",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "decrypt",
+        "lang": "en",
+        "url": "https://decrypt.co/feed",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "theblock",
+        "lang": "en",
+        "url": "https://www.theblock.co/rss.xml",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "blockmedia",
+        "lang": "ko",
+        "url": "https://www.blockmedia.co.kr/feed",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "tokenpost",
+        "lang": "ko",
+        "url": "https://www.tokenpost.kr/rss",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "googlenews_en",
+        "lang": "en",
+        "url": "https://news.google.com/rss/search?q=bitcoin%20OR%20ethereum%20OR%20XRP&hl=en-US&gl=US&ceid=US:en",
+        "type": "rss",
+        "enabled": false
+      },
+      {
+        "name": "googlenews_ko",
+        "lang": "ko",
+        "url": "https://news.google.com/rss/search?q=%EB%B9%84%ED%8A%B8%EC%BD%94%EC%9D%B8%20OR%20%EC%9D%B4%EB%8D%94%EB%A6%AC%EC%9B%80%20OR%20%EB%A6%AC%ED%94%8C&hl=ko&gl=KR&ceid=KR:ko",
+        "type": "rss",
+        "enabled": false
+      }
+    ]
+  }
+}

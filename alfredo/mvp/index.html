@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>알프레도 모의투자 데모</title>
+<!-- V1 (2026-10-13). 디자인은 Top3 Crypto V4 화면을 빌려 씀(호연 10-13 지시). 서버·로그인·바깥 호출 없음.
+     data/demo_week.js(build_demo.py가 만듦)를 읽어 그린다. 첨부용 한 파일은 dist/alfredo_mvp_demo.html -->
+<style>
+/* 글꼴: Pretendard(SIL OFL 1.1, 길형진)에서 쓰는 글자만 남기고 이름을 바꾼 것(mvp/fonts/README.md). 파일 안에 넣어 바깥에서 받지 않는다 */
+@font-face{font-family:"AlfredoSans";src:url("fonts/AlfredoSans-subset.woff") format("woff");font-weight:45 920;font-display:swap}
+/* 토큰은 Top3 Crypto와 같다. 기본 어둡게(Graphite), 밝게(Pearl) */
+:root{
+  color-scheme:dark;
+  --primary:#2997ff;--ink:#f5f5f7;--ink-80:#d2d2d7;--ink-48:#86868b;
+  --canvas:#000;--parchment:#0d0d0f;--pearl:#1d1d1f;--tile:#161617;--hairline:#2c2c2e;--divider:#262628;
+  --nav:#000;--on-nav:#fff;--nav-muted:#a1a1a6;
+  --up:#ff6b5e;--down:#5ea0ff;--warn:#f0a33c;--good:#30b35a;
+  --c-a:#b39dff;--c-b:#f5b942;--c-c:#2dd4bf;--c-d:#a3e635;
+  --band-bg:#2a2110;--band-ink:#f3d58a;--band-line:#5b4512;
+  --r-sm:8px;--r-md:11px;--r-lg:18px;--r-pill:9999px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Apple SD Gothic Neo","AlfredoSans",system-ui,sans-serif;
+  --font-d:-apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo","AlfredoSans",system-ui,sans-serif;
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --primary:#0066cc;--ink:#1d1d1f;--ink-80:#333;--ink-48:#6e6e73;
+  --canvas:#fff;--parchment:#f5f5f7;--pearl:#fafafc;--tile:#fff;--hairline:#e0e0e0;--divider:#f0f0f0;
+  --up:#d6342c;--down:#1f6fd0;--warn:#b25e00;--good:#1a7f37;
+  --c-a:#6d4aff;--c-b:#c56a00;--c-c:#0f8f80;--c-d:#5f7d00;
+  --band-bg:#fff4d6;--band-ink:#5b4300;--band-line:#eda100;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--parchment);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.47;letter-spacing:-.374px;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+h1,h2,h3,h4{margin:0;font-family:var(--font-d);font-weight:600}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none!important}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+button:focus-visible,[tabindex]:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--up)}.down{color:var(--down)}.zero{color:var(--ink-48)}
+
+/* 상단 바(Top3 v4) + 머리 띠(AI 고지·모의·투자 권유 아님, D-1013-4 답 전: 그대로) */
+.top{position:sticky;top:0;z-index:30}
+.gnav{background:var(--nav);color:var(--on-nav)}
+.gnav-in{max-width:1320px;margin:0 auto;padding:0 16px;height:52px;display:flex;align-items:center;gap:14px}
+.brand{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.logo{width:26px;height:26px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#e8e8ed,#9a9aa0);color:#1d1d1f;font:800 15px/1 var(--font-d)}
+.brand-t{font-family:var(--font-d);font-size:21px;letter-spacing:-.02em;font-weight:400}
+.brand-t b{font-weight:800}
+.brand-t i{font-style:normal;font-weight:300;color:#d2d2d7;margin-left:4px}
+.tabs{display:flex;gap:2px;background:rgba(255,255,255,.14);border-radius:var(--r-pill);padding:3px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+.tabs button{background:none;border:0;color:#e8e8ed;font-size:14px;font-weight:500;padding:5px 16px;border-radius:var(--r-pill);white-space:nowrap;line-height:1.2}
+.tabs button.on{background:#fff;color:#1d1d1f;font-weight:600}
+.ref-line{margin-left:auto;font-size:12px;color:var(--nav-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.theme-btn{background:none;border:1px solid #3a3a3c;color:var(--on-nav);width:30px;height:30px;border-radius:50%;font-size:14px;line-height:1;flex:none}
+.band{background:var(--band-bg);color:var(--band-ink);border-bottom:1px solid var(--band-line);padding:7px 16px;font-size:13px;font-weight:600;text-align:center;letter-spacing:-.2px}
+.wrap{max-width:1320px;margin:0 auto;padding:0 16px 60px}
+.mt{margin-top:17px}
+
+.grid{display:grid;gap:17px;margin-top:17px;align-items:stretch}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(max-width:860px){.g3,.g2{grid-template-columns:minmax(0,1fr)}.brand-t{display:none}}
+.tile{background:var(--tile);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px 24px;display:flex;flex-direction:column;min-width:0}
+.tile-h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tile-h h3{font-size:21px;display:flex;align-items:center}
+.sub{font-size:15px;margin:18px 0 6px;color:var(--ink-80)}
+.muted{color:var(--ink-48);font-size:14px}
+.fine{font-size:12px;color:var(--ink-48);letter-spacing:-.12px}
+p.fine{margin-top:10px}
+.help{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1px solid var(--hairline);color:var(--ink-48);font-size:11px;font-weight:600;position:relative;cursor:help;flex:none}
+.help .tip{display:none;position:absolute;right:0;top:24px;width:min(300px,80vw);background:var(--tile);color:var(--ink-80);border:1px solid var(--hairline);border-radius:var(--r-md);padding:10px 12px;font-size:13px;line-height:1.5;font-weight:400;z-index:25;box-shadow:0 12px 32px -18px rgba(0,0,0,.6);text-align:left;letter-spacing:-.2px}
+.help:hover .tip,.help:focus .tip{display:block}
+
+/* 성적표 한 줄(Top3 뉴스 띠 모양) */
+.ticker-line{display:flex;align-items:baseline;gap:10px;width:100%;padding:9px 14px;border:1px solid var(--hairline);border-radius:var(--r-md);background:var(--tile);color:var(--ink);font-size:14px;line-height:1.5}
+.tk-tag{font-size:11px;font-weight:600;color:var(--primary);flex:none}
+
+/* KPI 카드(Top3 확신도 카드): 이름·값 한 줄 → 큰 숫자 → 판정 한 줄. 누르면 아래 칸이 바뀐다 */
+.kcard{cursor:pointer;padding:22px 24px 20px;transition:border-color .15s;text-align:left;font:inherit;color:inherit}
+.kcard:hover{border-color:var(--ink-48)}
+.kcard.sel{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.kc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kc-name{font-size:14px;color:var(--ink-48)}
+.kc-name b{color:var(--ink);font-weight:600;font-size:15px}
+.kc-px{font-size:13px;white-space:nowrap;color:var(--ink-80)}
+.kc-px b{font-size:17px;font-weight:600;color:var(--ink)}
+.kc-l{font-size:12px;color:var(--ink-48);margin-top:16px}
+.kc-big{font-family:var(--font-d);font-size:58px;font-weight:600;line-height:1.05;letter-spacing:-.02em}
+.kc-lab{font-size:15px;color:var(--ink-80);margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media(max-width:860px){.kc-big{font-size:44px}.kcard{padding:16px 18px}}
+
+/* 등급·판정 표시: 상승·하락 색(빨강·파랑)과 섞지 않는다 */
+.gchip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:var(--r-pill);border:1px solid var(--hairline);white-space:nowrap;color:var(--ink-48)}
+.gchip.good{color:var(--good);border-color:color-mix(in srgb,var(--good) 45%,transparent)}
+.gchip.bad{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+
+/* 근거 표(Top3 근거 카드) */
+.evt{width:100%;border-collapse:collapse;font-size:13px}
+.evt th{color:var(--ink-48);font-weight:400;font-size:12px;text-align:left;padding:3px 6px}
+.evt td{padding:6px 6px;border-top:1px solid var(--divider);vertical-align:baseline;line-height:1.45}
+.evt .nm{color:var(--ink)}
+.evt .nt{color:var(--ink-48);font-size:12px}
+.evt .r{text-align:right;white-space:nowrap}
+@media(max-width:600px){#ev-body .evt,#detail-body .evt{min-width:520px}}
+.formula{margin-top:10px;font-size:12px;color:var(--ink-80);background:var(--pearl);border-radius:var(--r-sm);padding:7px 11px;line-height:1.55}
+.tbl{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.t{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.t th,table.t td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--divider);white-space:nowrap;vertical-align:top}
+table.t th{color:var(--ink-48);font-weight:400;font-size:12px}
+table.t .r{text-align:right}
+table.t td.w{white-space:normal;min-width:180px}
+
+/* 그래프·배분 */
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink-80);margin:0 0 6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible;font-family:var(--font)}
+.chart .ax{fill:var(--ink-48);font-size:11px}
+.chart .gl{stroke:var(--divider)}
+.chart-tip{position:absolute;top:8px;left:0;pointer-events:none;background:var(--tile);border:1px solid var(--hairline);border-radius:var(--r-md);padding:8px 10px;font-size:12px;line-height:1.55;box-shadow:0 12px 32px -18px rgba(0,0,0,.6);white-space:nowrap;opacity:0;transition:opacity .1s}
+.alloc{display:flex;height:22px;gap:2px;border-radius:6px;overflow:hidden;margin:6px 0 2px}
+.alloc div{height:100%;min-width:2px}
+.alloc-lab{display:flex;gap:2px;font-size:12px;color:var(--ink-80)}
+.alloc-lab div{overflow:hidden;white-space:nowrap;min-width:2px}
+.rules{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{border:1px solid var(--hairline);border-radius:var(--r-md);padding:9px 13px;font-size:14px}
+.rules .why{color:var(--ink-48);font-size:13px}
+
+/* 다음 주 질문(Top3 AI 근거 목록 모양) */
+.qlist{list-style:none;margin:0;padding:0;font-size:15px;line-height:1.6}
+.qlist li{padding:8px 0 8px 26px;position:relative;border-top:1px solid var(--divider);color:var(--ink-80)}
+.qlist li:first-child{border-top:0;padding-top:2px}
+.qlist li::before{content:"?";position:absolute;left:4px;top:8px;width:16px;height:16px;border-radius:50%;background:var(--pearl);border:1px solid var(--hairline);color:var(--primary);font-size:11px;font-weight:700;line-height:15px;text-align:center}
+.qlist li:first-child::before{top:3px}
+
+/* 범위 회고 */
+.range-row{display:grid;grid-template-columns:52px minmax(0,1fr) 260px;gap:10px;align-items:center;font-size:14px;padding:4px 0}
+.range{position:relative;height:26px}
+.range .track{position:absolute;top:12px;left:0;right:0;height:2px;background:var(--divider)}
+.range .bandbar{position:absolute;top:7px;height:12px;background:var(--pearl);border:1px solid var(--ink-48);border-radius:4px}
+.range .z{position:absolute;top:3px;width:1px;height:20px;background:var(--ink-48)}
+.range .dot{position:absolute;top:6px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--primary);border:2px solid var(--tile)}
+.range-row .t{font-size:12px;color:var(--ink-80);font-variant-numeric:tabular-nums}
+@media(max-width:600px){.range-row{grid-template-columns:44px minmax(0,1fr)}.range-row .t{grid-column:2}}
+
+/* 사용 방법(Top3 공부 노트 모양) */
+.study-doc{font-size:15px;line-height:1.7}
+.study-doc h2{font-size:20px;margin:24px 0 8px;padding-top:12px;border-top:1px solid var(--divider)}
+.study-doc h2:first-child{border-top:0;margin-top:0;padding-top:0}
+.study-doc p{margin:6px 0}
+.study-doc ol,.study-doc ul{margin:6px 0 6px 22px;padding:0}
+.study-doc li{margin:4px 0}
+.study-doc dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:6px 0}
+.study-doc dt{font-weight:600}
+.study-doc dd{margin:0;color:var(--ink-80)}
+@media(max-width:600px){.study-doc dl{grid-template-columns:minmax(0,1fr)}.study-doc dd{margin-bottom:6px}}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 16px;font-size:14px}
+.kv .k{color:var(--ink-48)}
+@media(max-width:600px){.kv{grid-template-columns:minmax(0,1fr);gap:2px}.kv .k{margin-top:8px}}
+.foot{margin-top:28px;font-size:12px;color:var(--ink-48);line-height:1.6}
+.foot a{color:var(--primary)}
+.alert{padding:12px 16px;border-radius:var(--r-md);border:1px solid var(--warn);color:var(--warn)}
+
+@media(max-width:700px){
+  .gnav-in{gap:8px;padding:0 12px}
+  .tabs{margin-left:0}
+  .tabs button{padding:5px 12px}
+  .ref-line{display:none}
+  .wrap{padding:0 12px 48px}
+  .tile{padding:16px;border-radius:var(--r-md)}
+  .tile-h h3{font-size:18px}
+  .kcard{padding:14px 16px}
+  .kc-l{margin-top:8px}
+  .kc-big{font-size:40px}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <header class="gnav">
+    <div class="gnav-in">
+      <span class="brand"><span class="logo" aria-hidden="true">A</span><span class="brand-t"><b>Alfredo</b><i>모의투자</i></span></span>
+      <nav class="tabs" role="tablist" aria-label="화면">
+        <button role="tab" class="on" data-view="home" aria-selected="true">홈</button>
+        <button role="tab" data-view="report" aria-selected="false">주간 보고</button>
+        <button role="tab" data-view="guide" aria-selected="false">사용 방법</button>
+      </nav>
+      <span class="ref-line" id="ref-line"></span>
+      <button type="button" class="theme-btn" id="theme-btn" aria-label="밝게 보기">☀</button>
+    </div>
+  </header>
+  <div class="band" id="band" role="note">AI가 만든 정보이며 투자 권유가 아닙니다. 모의투자 기준입니다.</div>
+</div>
+
+<main class="wrap" id="app">
+  <!-- 홈: 성적표 한 줄 → KPI 카드 3장 → 고른 카드의 자세한 칸 → 다음 주 질문 · 근거 → 코인 칸(Top3 연결 자리) -->
+  <section id="view-home">
+    <div class="mt"><div class="ticker-line"><span class="tk-tag">성적표</span><span id="honest"></span></div></div>
+    <div class="grid g3" id="cards" role="group" aria-label="볼 칸 고르기"></div>
+
+    <article class="tile mt" id="detail">
+      <div class="tile-h"><h3 id="detail-title"></h3><span class="fine" id="detail-meta"></span></div>
+      <div id="detail-body"></div>
+    </article>
+
+    <div class="grid g2">
+      <article class="tile" id="next">
+        <div class="tile-h"><h3>다음 주에 정할 것</h3><span class="fine">최종 결정은 사용자가 합니다</span></div>
+        <ul class="qlist" id="dec"></ul>
+        <h4 class="sub">기록해 둔 예상, 맞았나</h4>
+        <div class="tbl" id="pred"></div>
+      </article>
+      <article class="tile" id="evidence">
+        <div class="tile-h"><h3>근거 · 정직한 성적표</h3>
+          <span class="help" tabindex="0">i<span class="tip">점수 하나로 합치지 않습니다. 지표마다 비교 대상과의 차이로 등급을 매깁니다. 차이가 +1%p보다 크면 기준 이상, −1%p보다 작으면 기준 미만, 그 사이(±1%p 포함)는 기준 근처입니다. 못한 주도 숨기지 않습니다.</span></span>
+        </div>
+        <div id="ev-body"></div>
+      </article>
+    </div>
+
+    <article class="tile mt" id="coins">
+      <div class="tile-h"><h3>코인 칸 · Top3 연결 자리</h3><span class="fine">Top3 판정은 읽기만 합니다 · 이 데모는 연결 전</span></div>
+      <div class="tbl" id="coin-body"></div>
+      <p class="fine" id="coin-note"></p>
+    </article>
+  </section>
+
+  <!-- 주간 보고: 범위 회고 → 정정 기록 → 거래 기록 → 가정과 출처 -->
+  <section id="view-report" hidden>
+    <article class="tile mt">
+      <div class="tile-h"><h3>범위 회고</h3><span class="fine">지난주에 보여 드린 '과거 범위' 안에 들어왔나</span></div>
+      <p class="muted" id="range-lede"></p>
+      <div id="ranges" class="mt"></div>
+    </article>
+    <div class="grid g2">
+      <article class="tile">
+        <div class="tile-h"><h3>집사의 정정 기록</h3></div>
+        <div id="corr"></div>
+      </article>
+      <article class="tile">
+        <div class="tile-h"><h3>거래 기록</h3><span class="fine">모의 장부 · 주문은 나가지 않습니다</span></div>
+        <div class="tbl" id="trades"></div>
+      </article>
+    </div>
+    <article class="tile mt">
+      <div class="tile-h"><h3>가정과 출처</h3></div>
+      <div class="kv" id="assume"></div>
+      <h4 class="sub">예시 배분 템플릿 3개 (모두에게 같은 예시, 추천 아님)</h4>
+      <div class="tbl" id="tpl"></div>
+      <ul class="fine" id="tpl-basis" style="padding-left:18px;margin:8px 0 0"></ul>
+    </article>
+  </section>
+
+  <!-- 사용 방법: 낱말 풀이 → 화면 안내 → 문제가 생기면 → 꼭 기억할 것 -->
+  <section id="view-guide" hidden>
+    <article class="tile mt study-doc">
+      <h2>1. 낱말 풀이</h2>
+      <dl>
+        <dt>모의 장부</dt><dd>가상의 돈으로 사고판 기록입니다. 실제 계좌와 연결되지 않고 주문도 나가지 않습니다.</dd>
+        <dt>출발 배분</dt><dd>처음에 돈을 주식·채권·금·코인·현금에 나눈 비율입니다. 이 데모는 '중립' 예시를 씁니다.</dd>
+        <dt>원칙(규칙)</dt><dd>거래하기 전에 스스로 정해 둔 약속입니다(예: 한 자산 40% 이하). 숫자는 사용자가 정합니다.</dd>
+        <dt>원칙 이행률</dt><dd>거래마다 규칙을 대조해 지킨 판정의 몫입니다. 지킴 수 ÷ 판정 수.</dd>
+        <dt>기준 이상·근처·미만</dt><dd>비교 대상보다 1%p 넘게 나으면 기준 이상, 1%p 넘게 못하면 기준 미만, 그 사이는 기준 근처입니다.</dd>
+        <dt>합성 가격</dt><dd>실제 시세가 아니라 정해진 규칙으로 만든 가짜 가격입니다. 시연용입니다.</dd>
+        <dt>AI 추정</dt><dd>AI 모델이 낸 추정치에만 붙이는 표시입니다. 이 데모의 숫자는 모두 정해진 계산식(코드)으로 냈고, AI 추정은 아직 없습니다.</dd>
+      </dl>
+      <h2>2. 화면 안내</h2>
+      <ol>
+        <li><b>맨 위 띠</b>: AI가 만든 정보이고 투자 권유가 아니며 모의투자라는 안내입니다. 어느 화면에서나 보입니다.</li>
+        <li><b>성적표 한 줄</b>: 이번 주를 한 문장으로 적습니다. 못한 주도 그대로 적습니다.</li>
+        <li><b>카드 세 장</b>: 수익률 · 원칙 이행률 · 배분. 카드를 누르면 바로 아래 큰 칸이 그 내용으로 바뀝니다.</li>
+        <li><b>다음 주에 정할 것</b>: 집사가 고르지 않고 질문으로 남깁니다. 답은 사용자가 합니다.</li>
+        <li><b>근거 · 정직한 성적표</b>: 지표마다 비교 대상, 차이, 등급과 계산식을 보입니다.</li>
+        <li><b>코인 칸</b>: 코인 영역은 팀 프로젝트 Top3 Crypto의 판정을 읽기만 하는 자리입니다. 이 데모에서는 아직 연결하지 않았습니다.</li>
+        <li><b>주간 보고 탭</b>: 범위 회고, 정정 기록, 거래 기록, 가정과 출처가 있습니다.</li>
+      </ol>
+      <h2>3. 문제가 생기면</h2>
+      <ul>
+        <li>메일 미리보기에서는 화면이 깨질 수 있습니다. 파일을 내려받아 더블클릭해 크롬·사파리·엣지로 여세요. 설치·로그인·인터넷 연결이 필요 없습니다.</li>
+        <li>표가 화면보다 넓으면 표를 옆으로 밀어 봅니다.</li>
+        <li>글자가 너무 밝거나 어두우면 오른쪽 위 ☀ 단추로 바꿉니다.</li>
+      </ul>
+      <h2>4. 꼭 기억할 것</h2>
+      <ul>
+        <li>모의투자입니다. 실제 돈과 주문이 오가지 않습니다.</li>
+        <li>특정 종목이나 시점을 권하지 않습니다. 배분 템플릿도 모두에게 같은 예시입니다.</li>
+        <li>화면의 가격은 합성값입니다. 실제 시세가 아닙니다.</li>
+        <li>최종 결정은 언제나 사용자가 합니다.</li>
+      </ul>
+    </article>
+  </section>
+
+  <footer class="foot"><p><a href="#guide" data-open="guide">사용 방법</a></p><p id="foot"></p></footer>
+</main>
+
+<script src="data/demo_week.js"></script>
+<script>
+(function () {
+  "use strict";
+  const D = window.ALFREDO_DEMO;
+  const $ = (id) => document.getElementById(id);
+  if (!D) {
+    $("app").innerHTML = '<p class="alert mt">데이터를 찾지 못했습니다. index.html과 data 폴더를 같은 곳에 두고 여세요.</p>';
+    return;
+  }
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const minus = (s) => String(s).replace(/(^|[^\d])-(?=\d)/g, "$1−");
+  const won = (x) => minus(Math.round(x).toLocaleString("ko-KR")) + "원";
+  const pct = (x, d = 2) => (x == null || !isFinite(x) ? "—" : minus((x > 0 ? "+" : "") + (x * 100).toFixed(d) + "%"));
+  const pp = (x, d = 1) => (x == null || !isFinite(x) ? "—" : minus((x > 0 ? "+" : "") + (x * 100).toFixed(d) + "%p"));
+  const wt = (x, d = 1) => (x * 100).toFixed(d) + "%";
+  const md = (s) => s.slice(5).replace("-", "/");
+  const sgn = (x) => (x > 0 ? "up" : x < 0 ? "down" : "zero");
+  const num2 = (x) => Number(x).toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const M = D.meta, P = D.portfolio, R = D.principles, W = D.weekly;
+  const LABEL = Object.fromEntries(M.assets.map((a) => [a.id, a.label]));
+  const GCOL = { 주식: "var(--primary)", 채권: "var(--c-c)", 금: "var(--c-b)", 코인: "var(--c-a)", 현금: "var(--ink-48)" };
+  const gchip = (g) => g === "기준 이상" ? '<span class="gchip good">▲ 기준 이상</span>'
+    : g === "기준 미만" ? '<span class="gchip bad">▼ 기준 미만</span>'
+    : g ? '<span class="gchip">● 기준 근처</span>' : '<span class="gchip">미확인</span>';
+  const okchip = (ok, y = "지킴", n = "어김") => ok ? `<span class="gchip good">✓ ${y}</span>` : `<span class="gchip bad">✕ ${n}</span>`;
+
+  // ---- 상단 ----
+  $("band").textContent = M.band;
+  $("ref-line").textContent = `합성 시나리오 · ${md(M.start)}–${md(M.end)} 종가 기준`;
+  $("foot").textContent = `${M.version} · ${M.engine} · 만든 시각 ${M.built_at.replace("T", " ").slice(0, 16)} UTC · 글꼴: Pretendard(SIL OFL 1.1)에서 쓰는 글자만 넣음`;
+  const themeBtn = $("theme-btn");
+  function setTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeBtn.textContent = t === "dark" ? "☀" : "☾";
+    themeBtn.setAttribute("aria-label", t === "dark" ? "밝게 보기" : "어둡게 보기");
+  }
+  themeBtn.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  setTheme("dark");
+
+  // ---- 탭 ----
+  const VIEWS = ["home", "report", "guide"];
+  function show(v) {
+    if (!VIEWS.includes(v)) v = "home";
+    VIEWS.forEach((x) => { $("view-" + x).hidden = x !== v; });
+    document.querySelectorAll(".tabs button").forEach((b) => { const on = b.dataset.view === v; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+  }
+  document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => { show(b.dataset.view); history.replaceState(null, "", "#" + b.dataset.view); window.scrollTo(0, 0); }));
+  document.querySelectorAll("[data-open]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); show(a.dataset.open); history.replaceState(null, "", "#" + a.dataset.open); window.scrollTo(0, 0); }));
+
+  // ---- 홈: 성적표 한 줄 · 카드 ----
+  $("honest").textContent = minus(W.honest);
+  const s0 = W.scorecard[0];
+  const worst = P.groups.reduce((a, b) => (Math.abs(b.drift) > Math.abs(a.drift) ? b : a));
+  const nBad = R.count - R.ok;
+  const CARDS = [
+    { k: "ret", name: "수익률", sub: "비용 후", px: `<b class="num">${won(P.total)}</b>`, l: "가상 1,000만 원에서",
+      big: pct(P.return), cls: sgn(P.return), lab: `출발 배분 그대로 ${pct(s0.bench)} ${gchip(s0.grade)}` },
+    { k: "pr", name: "원칙 이행률", sub: `규칙 ${R.rules.length}개`, px: `판정 <b class="num">${R.count}</b>건`, l: "지킴 ÷ 판정",
+      big: R.rate == null ? "—" : Math.round(R.rate * 100) + "%", cls: "", lab: `어김 ${nBad}건 · 목표 90% ${gchip(W.scorecard[3].grade)}` },
+    { k: "alloc", name: "배분", sub: `'${M.template_name}' 예시에서`, px: `점검 기준 ±${Math.round(M.rebal_band * 100)}%p`, l: `가장 많이 벗어난 칸: ${worst.group}`,
+      big: pp(worst.drift), cls: "", lab: `벗어난 칸 ${P.groups.filter((g) => !g.ok).length}개 ${okchip(P.groups.every((g) => g.ok), "모두 기준 안", "기준 밖 있음")}` },
+  ];
+  let selected = "ret";
+  function renderCards() {
+    $("cards").innerHTML = CARDS.map((c) => `<button type="button" class="tile kcard${c.k === selected ? " sel" : ""}" data-k="${c.k}" aria-pressed="${c.k === selected}">
+      <div class="kc-top"><span class="kc-name"><b>${esc(c.name)}</b> · ${esc(c.sub)}</span><span class="kc-px">${c.px}</span></div>
+      <div class="kc-l">${esc(c.l)}</div>
+      <div class="kc-big num ${c.cls}">${esc(c.big)}</div>
+      <div class="kc-lab">${c.lab}</div></button>`).join("");
+    document.querySelectorAll("#cards .kcard").forEach((el) => el.addEventListener("click", () => {
+      if (selected === el.dataset.k) return;
+      selected = el.dataset.k; renderCards(); renderDetail();
+      const again = document.querySelector(`#cards .kcard[data-k="${selected}"]`); if (again) again.focus({ preventScroll: true });
+    }));
+  }
+
+  // ---- 홈: 고른 카드의 자세한 칸 ----
+  function renderDetail() {
+    const body = $("detail-body");
+    if (selected === "ret") {
+      $("detail-title").textContent = "한 주 동안의 평가액";
+      $("detail-meta").textContent = `${md(M.start)} 종가 → ${md(M.end)} 종가 · 합성 가격`;
+      body.innerHTML = lineChart() + `<h4 class="sub">보유 자산</h4><div class="tbl">${positionsTable()}</div>`;
+      bindChart();
+    } else if (selected === "pr") {
+      $("detail-title").textContent = "원칙 점검";
+      $("detail-meta").textContent = `규칙 ${R.version} · 거래마다 코드가 대조합니다`;
+      body.innerHTML = rulesHtml();
+    } else {
+      $("detail-title").textContent = "배분: 지금과 출발 배분";
+      $("detail-meta").textContent = `${md(M.end)} 종가 기준 · 출발 배분에서 ±${Math.round(M.rebal_band * 100)}%p 넘게 벗어나면 어김`;
+      body.innerHTML = allocHtml();
+    }
+  }
+
+  const SERIES = [
+    { k: "mine", n: "내 모의 장부", c: "var(--primary)" },
+    { k: "bm5", n: "출발 배분 그대로", c: "var(--c-b)" },
+    { k: "b6040", n: "주식 60·채권 40", c: "var(--c-c)" },
+  ];
+  // 그래프 크기는 칸 폭을 그대로 쓴다(글자가 늘거나 줄지 않게). 좁으면 끝 이름표를 빼고 범례만 둔다
+  const CH = { W: 720, H: 250, m: { l: 52, r: 128, t: 12, b: 26 }, narrow: false };
+  function sizeChart() {
+    const w = Math.max(300, Math.round(($("detail-body").clientWidth || 720)));
+    CH.narrow = w < 560; CH.W = w; CH.H = CH.narrow ? 210 : 260;
+    CH.m = { l: 46, r: CH.narrow ? 10 : 132, t: 12, b: 26 };
+  }
+  function chartScale() {
+    const pts = P.series, vals = pts.flatMap((p) => SERIES.map((s) => p[s.k]));
+    let lo = Math.min(...vals, M.capital), hi = Math.max(...vals, M.capital);
+    const pad = (hi - lo) * 0.12 || 1; lo -= pad; hi += pad;
+    const m = CH.m;
+    return { pts, x: (i) => m.l + (i * (CH.W - m.l - m.r)) / (pts.length - 1), y: (v) => m.t + ((hi - v) * (CH.H - m.t - m.b)) / (hi - lo), lo, hi };
+  }
+  function lineChart() {
+    sizeChart();
+    const { pts, x, y, lo, hi } = chartScale(), m = CH.m;
+    let g = "";
+    for (let k = 0; k <= 4; k++) {
+      const v = lo + ((hi - lo) * k) / 4;
+      g += `<line class="gl" x1="${m.l}" x2="${CH.W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${(v / 1e4).toFixed(0)}만</text>`;
+    }
+    pts.forEach((p, i) => { if (!CH.narrow || i % 2 === 0 || i === pts.length - 1) g += `<text class="ax" x="${x(i)}" y="${CH.H - 6}" text-anchor="middle">${md(p.date)}</text>`; });
+    g += `<line x1="${m.l}" x2="${CH.W - m.r}" y1="${y(M.capital)}" y2="${y(M.capital)}" stroke="var(--ink-48)" stroke-dasharray="3 4" opacity=".7"/>`;
+    SERIES.forEach((s) => {
+      const d = pts.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p[s.k]).toFixed(1)}`).join("");
+      g += `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="${s.k === "mine" ? 2.2 : 1.6}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    });
+    const ends = SERIES.map((s) => ({ s, yy: y(pts[pts.length - 1][s.k]) })).sort((a, b) => a.yy - b.yy);
+    for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < 15) ends[i].yy = ends[i - 1].yy + 15;
+    if (!CH.narrow) ends.forEach(({ s, yy }) => { g += `<text x="${CH.W - m.r + 8}" y="${yy + 4}" font-size="12" fill="${s.c}">${s.n}</text>`; });
+    g += `<line id="cross" y1="${m.t}" y2="${CH.H - m.b}" stroke="var(--ink-48)" opacity="0"/>`;
+    SERIES.forEach((s) => { g += `<circle class="hov" data-k="${s.k}" r="4.5" fill="${s.c}" stroke="var(--tile)" stroke-width="2" opacity="0"/>`; });
+    g += `<rect id="hit" x="${m.l}" y="0" width="${CH.W - m.l - m.r}" height="${CH.H}" fill="transparent"/>`;
+    return `<div class="legend">${SERIES.map((s) => `<span><i style="background:${s.c}"></i>${s.n}</span>`).join("")}<span class="fine">점선: 시작 금액</span></div>` +
+      `<div class="chart" id="chart"><svg viewBox="0 0 ${CH.W} ${CH.H}" role="img" aria-label="한 주 평가액 비교">${g}</svg><div class="chart-tip" id="tip"></div></div>`;
+  }
+  function bindChart() {
+    const svg = document.querySelector("#chart svg"), tip = $("tip");
+    if (!svg) return;
+    const { pts, x, y } = chartScale(), m = CH.m;
+    const move = (evt) => {
+      const r = svg.getBoundingClientRect(), sx = ((evt.clientX - r.left) * CH.W) / r.width;
+      const i = Math.max(0, Math.min(pts.length - 1, Math.round(((sx - m.l) * (pts.length - 1)) / (CH.W - m.l - m.r))));
+      const p = pts[i], cross = svg.querySelector("#cross");
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 1);
+      svg.querySelectorAll(".hov").forEach((c) => { c.setAttribute("cx", x(i)); c.setAttribute("cy", y(p[c.dataset.k])); c.setAttribute("opacity", 1); });
+      tip.innerHTML = `<b>${md(p.date)} 종가</b><br>` + SERIES.map((s) => `<span style="color:${s.c}">●</span> ${s.n} ${won(p[s.k])} (${pct(p[s.k] / M.capital - 1)})`).join("<br>");
+      const left = (x(i) / CH.W) * r.width;
+      tip.style.left = Math.max(0, Math.min(left + 12, r.width - tip.offsetWidth - 4)) + "px";
+      tip.style.opacity = 1;
+    };
+    const hide = () => { tip.style.opacity = 0; svg.querySelector("#cross").setAttribute("opacity", 0); svg.querySelectorAll(".hov").forEach((c) => c.setAttribute("opacity", 0)); };
+    const hit = svg.querySelector("#hit");
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move); hit.addEventListener("pointerleave", hide);
+  }
+  function positionsTable() {
+    return `<table class="t"><tr><th>자산</th><th>칸</th><th class="r">비중</th><th class="r">평균단가</th><th class="r">${md(M.end)} 종가</th><th class="r">평가액</th><th class="r">평가손익</th></tr>` +
+      P.positions.map((p) => `<tr><td>${esc(p.label)}</td><td>${esc(p.group)}</td><td class="r">${wt(p.weight)}</td><td class="r">${num2(p.avg_cost)}</td><td class="r">${num2(p.price)}</td>` +
+        `<td class="r">${won(p.value)}</td><td class="r ${sgn(p.unrealized)}">${won(p.unrealized)} (${pct(p.unrealized_pct)})</td></tr>`).join("") +
+      `<tr><td>현금</td><td>현금</td><td class="r">${wt(P.cash / P.total)}</td><td></td><td></td><td class="r">${won(P.cash)}</td><td></td></tr></table>` +
+      `<p class="fine">가격은 합성 지수(시작 100)입니다. 비용 합계 ${won(P.costs.total)}(수수료 ${won(P.costs.fees)} · 슬리피지 ${won(P.costs.slippage)}).</p>`;
+  }
+  const ptxt = (r) => r.params.max_weight != null ? `한 자산 ${Math.round(r.params.max_weight * 100)}% 이하`
+    : r.params.loss_pct != null ? `평균단가 대비 −${Math.round(r.params.loss_pct * 100)}% 이하로 내려가면 추가 매수 금지`
+    : r.params.min_dip_pct != null ? `평균단가보다 ${Math.round(r.params.min_dip_pct * 100)}% 이상 쌀 때만 추가 매수` : "";
+  function rulesHtml() {
+    const rate = R.rate == null ? "판정 없음" : `${R.ok} ÷ ${R.count} = ${Math.round(R.rate * 100)}%`;
+    return `<ul class="rules">${R.rules.map((r) => `<li><b>${esc(r.name)}</b> · ${esc(ptxt(r))}<div class="why">왜: ${esc(r.why)}</div></li>`).join("")}</ul>` +
+      `<h4 class="sub">거래별 판정</h4><div class="tbl"><table class="evt"><tr><th>날짜</th><th>거래</th><th>규칙</th><th>판정</th><th>근거(값 · 기준)</th></tr>` +
+      R.judgements.map((j) => `<tr><td class="num">${md(j.date)}</td><td class="nm">${esc(LABEL[j.symbol] || j.symbol)} 모의 매수${j.note ? `<div class="nt">${esc(j.note)}</div>` : ""}</td>` +
+        `<td>${esc(j.rule_name)}</td><td>${okchip(j.ok)}</td><td class="nt">${esc(minus(j.detail))}</td></tr>`).join("") +
+      `</table></div><div class="formula num">원칙 이행률 = 지킴 ÷ 판정 = ${rate} · 판정은 코드가 하고, 규칙의 숫자는 사용자가 정합니다.</div>`;
+  }
+  function allocHtml() {
+    const now = P.groups.map((g) => [g.group, g.actual]), start = P.groups.map((g) => [g.group, g.target]);
+    const bar = (label, parts) => `<div class="fine" style="margin-top:8px">${label}</div><div class="alloc">` +
+      parts.filter(([, w]) => w > 0).map(([k, w]) => `<div title="${k} ${wt(w)}" style="flex:${w};background:${GCOL[k]}"></div>`).join("") +
+      `</div><div class="alloc-lab">` + parts.filter(([, w]) => w > 0).map(([k, w]) => `<div style="flex:${w}">${w >= 0.04 ? `${k} ${wt(w, 0)}` : ""}</div>`).join("") + `</div>`;
+    return bar("지금", now) + bar(`출발 배분 '${esc(M.template_name)}' 예시`, start) +
+      `<div class="tbl mt"><table class="t"><tr><th>칸</th><th class="r">출발</th><th class="r">지금</th><th class="r">차이</th><th>판정</th></tr>` +
+      P.groups.map((g) => `<tr><td><span style="color:${GCOL[g.group]}">●</span> ${g.group}</td><td class="r">${wt(g.target)}</td><td class="r">${wt(g.actual)}</td><td class="r">${pp(g.drift)}</td><td>${okchip(g.ok)}</td></tr>`).join("") +
+      `</table></div><p class="fine">코인 칸은 BTC·ETH·XRP를 합친 값입니다. 판정 기준: |차이| ≤ ${Math.round(M.rebal_band * 100)}%p이면 지킴(경계 포함). 시연용 기준이며 사용자가 정합니다.</p>`;
+  }
+
+  // ---- 홈: 다음 주 질문 · 예상 채점 · 근거 ----
+  $("dec").innerHTML = W.decisions.map((q) => `<li>${esc(minus(q))}</li>`).join("");
+  $("pred").innerHTML = W.predictions.length
+    ? `<table class="t"><tr><th>날짜</th><th>거래 때 적은 예상</th><th class="r">그때</th><th class="r">${md(M.end)}</th><th>결과</th></tr>` +
+      W.predictions.map((p) => `<tr><td class="num">${md(p.date)}</td><td class="w">${esc(LABEL[p.symbol] || p.symbol)}: "${esc(p.expect)}"</td><td class="r">${num2(p.price_then)}</td>` +
+        `<td class="r">${num2(p.price_end)} <span class="${sgn(p.change)}">(${pct(p.change, 1)})</span></td><td>${okchip(p.right, "맞음", "틀림")}</td></tr>`).join("") + `</table>`
+    : `<p class="muted">이번 주에 기록된 예상이 없습니다.</p>`;
+  const fmtM = (r) => (r.metric === "원칙 이행률" ? (r.mine == null ? "—" : Math.round(r.mine * 100) + "%") : pct(r.mine));
+  const fmtB = (r) => (r.metric === "원칙 이행률" ? Math.round(r.bench * 100) + "%" : pct(r.bench));
+  $("ev-body").innerHTML = `<div class="tbl"><table class="evt"><tr><th>지표 · 비교 대상</th><th class="r">내 장부</th><th class="r">비교</th><th class="r">차이</th><th>등급</th></tr>` +
+    W.scorecard.map((r) => `<tr><td class="nm">${esc(r.metric)}<div class="nt">${esc(r.bench_name)} · ${esc(r.better)}</div></td><td class="r num">${fmtM(r)}</td>` +
+      `<td class="r num">${fmtB(r)}</td><td class="r num">${pp(r.diff)}</td><td>${gchip(r.grade)}</td></tr>`).join("") + `</table></div>` +
+    `<div class="formula num">수익률 = (평가액 − 시작 금액) ÷ 시작 금액 = (${Math.round(P.total).toLocaleString("ko-KR")} − ${M.capital.toLocaleString("ko-KR")}) ÷ ${M.capital.toLocaleString("ko-KR")} = ${pct(P.return)}</div>` +
+    `<p class="fine">비용(수수료 ${(M.fee * 100).toFixed(2)}%, 슬리피지 ${(M.slippage * 100).toFixed(2)}%)을 뺀 값입니다. 점수 하나로 합치지 않습니다.</p>`;
+
+  // ---- 홈: 코인 칸(Top3 연결 자리) ----
+  $("coin-body").innerHTML = `<table class="t"><tr><th>코인</th><th class="r">지금 비중</th><th class="r">한 주 변화(합성)</th><th>Top3 판정</th></tr>` +
+    D.coins.map((c) => `<tr><td><b>${esc(c.id)}</b> <span class="muted">${esc(c.label)}</span></td><td class="r">${wt(c.weight, 2)}</td>` +
+      `<td class="r ${sgn(c.week_change)}">${pct(c.week_change, 1)}</td><td class="muted">연결 전</td></tr>`).join("") + `</table>`;
+  $("coin-note").innerHTML = `코인 영역은 팀 프로젝트 Top3 Crypto의 판정을 읽기 전용으로 받아 보일 자리입니다. 알프레도는 그 판정으로 사고팔 시점을 고르지 않습니다. ` +
+    `실제 Top3 화면(공개): <a href="${esc(M.top3_url)}" target="_blank" rel="noopener noreferrer">${esc(M.top3_url.replace("https://", ""))} ↗</a>`;
+
+  // ---- 주간 보고 ----
+  const band = W.range_band;
+  $("range-lede").textContent = `시작일(${md(M.start)}) 기준 지난 ${W.range_review[0].lookback_days}일 동안 7일 수익률의 ${Math.round((band[1] - band[0]) * 100)}%가 들어간 범위(회색)와 이번 주 실제(점)입니다. 범위는 예측이 아니라 과거 기록입니다. 범위가 넓으면 맞히기 쉽다는 점도 함께 봅니다.`;
+  const lim = Math.max(0.05, ...W.range_review.flatMap((r) => [Math.abs(r.low), Math.abs(r.high), Math.abs(r.actual)])) * 1.1;
+  const pos = (v) => ((v + lim) / (2 * lim)) * 100;
+  $("ranges").innerHTML = W.range_review.map((r) =>
+    `<div class="range-row"><b>${esc(r.id)}</b><div class="range" title="범위 ${pct(r.low, 1)} – ${pct(r.high, 1)}, 실제 ${pct(r.actual, 1)}">` +
+    `<div class="track"></div><div class="bandbar" style="left:${pos(r.low)}%;width:${pos(r.high) - pos(r.low)}%"></div>` +
+    `<div class="z" style="left:${pos(0)}%"></div><div class="dot" style="left:${pos(r.actual)}%"></div></div>` +
+    `<div class="t">${pct(r.low, 1)} – ${pct(r.high, 1)} · 실제 ${pct(r.actual, 1)} ${okchip(r.inside, "안", "밖")}</div></div>`).join("");
+  const inside = W.range_review.filter((r) => r.inside).length;
+  $("corr").innerHTML = W.corrections.length
+    ? `<ul class="qlist">${W.corrections.map((c) => `<li>${esc(minus(c.what))} → ${esc(minus(c.actual))}. ${esc(c.note)}</li>`).join("")}</ul><p class="fine">틀린 것은 날짜·틀린 값·바른 값을 남기고 지우지 않습니다.</p>`
+    : `<p class="muted">이번 주 정정 0건. 범위 회고 ${W.range_review.length}개 중 ${inside}개가 범위 안이었습니다. 틀린 것이 생기면 날짜·틀린 값·바른 값을 여기에 남기고 지우지 않습니다.</p>`;
+  const SIDE = { deposit: "입금", buy: "모의 매수", sell: "모의 매도", withdraw: "출금" };
+  $("trades").innerHTML = `<table class="t"><tr><th>날짜</th><th>종류</th><th>자산</th><th class="r">가격</th><th class="r">수수료</th><th>메모</th></tr>` +
+    D.trades.map((t) => `<tr><td class="num">${md(t.date)}</td><td>${SIDE[t.side] || esc(t.side)}</td><td>${t.side === "deposit" ? "현금" : esc(LABEL[t.symbol] || t.symbol)}</td>` +
+      `<td class="r">${t.side === "deposit" ? won(t.qty) : num2(t.price)}</td><td class="r">${t.fee ? won(t.fee) : ""}</td><td class="w">${esc(t.note || "")}</td></tr>`).join("") + `</table>`;
+  const kv = [
+    ["시나리오", M.scenario], ["가격", M.price_note], ["체결", M.fill_rule],
+    ["비용", `수수료 ${(M.fee * 100).toFixed(2)}%, 슬리피지 ${(M.slippage * 100).toFixed(2)}%(설계서 비용표 기본값)`],
+    ["자산 변동성(연, 합성)", M.assets.map((a) => `${a.id} ${Math.round(a.vol * 100)}%`).join(" · ")],
+    ["엔진", `${M.engine} · 장부·원칙 판정은 엔진, 화면 계산은 build_demo.py`],
+  ];
+  $("assume").innerHTML = kv.map(([k, v]) => `<div class="k">${esc(k)}</div><div>${esc(v)}</div>`).join("");
+  const G = ["주식", "채권", "금", "코인", "현금"];
+  $("tpl").innerHTML = `<table class="t"><tr><th>템플릿</th>${G.map((g) => `<th class="r">${g}</th>`).join("")}</tr>` +
+    Object.entries(M.templates).map(([n, t]) => `<tr><td>${esc(n)}${n === M.template_name ? ' <span class="gchip">이 데모</span>' : ""}</td>${G.map((g) => `<td class="r">${Math.round(t[g] * 100)}%</td>`).join("")}</tr>`).join("") + `</table>`;
+  $("tpl-basis").innerHTML = M.template_basis.map((b) => `<li>${esc(b.text)} <a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">출처 ↗</a></li>`).join("");
+
+  renderCards();
+  renderDetail();
+  let rz = 0, lastW = $("detail-body").clientWidth;
+  window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { const w = $("detail-body").clientWidth; if (selected === "ret" && w !== lastW) { lastW = w; renderDetail(); } }, 150); });
+  show((location.hash || "#home").slice(1));
+})();
+</script>
+</body>
+</html>

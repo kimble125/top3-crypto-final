@@ -1,0 +1,96 @@
+{
+  "_설명": "제출용 예시 설정. 운영 규칙과 값·버전 해시가 다르며 운영 성적 재현용이 아닙니다.",
+  "status": "temp",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "XRPUSDT"
+  ],
+  "analysis_period": "4h",
+  "macd": {
+    "period": "4h",
+    "fast": 12,
+    "slow": 26,
+    "signal": 9
+  },
+  "stoch_pair": {
+    "period": "1h",
+    "stoch": {
+      "k": 14,
+      "smooth_k": 3,
+      "d": 3,
+      "cross_exception": true
+    },
+    "stochrsi": {
+      "rsi": 14,
+      "stoch": 14,
+      "k": 3,
+      "d": 3,
+      "cross_exception": false
+    },
+    "upper": 75,
+    "lower": 25,
+    "zone_mapping": "standard",
+    "max_age_bars": null,
+    "mode": "kd_state",
+    "fake_filter": {
+      "upper": 75
+    }
+  },
+  "vpci": {
+    "period": "15m",
+    "short": 5,
+    "long": 20,
+    "signal": 9,
+    "cross_target": "zero_or_signal",
+    "signal_ma": "sma"
+  },
+  "weights": {
+    "macd": 3,
+    "pair": 2,
+    "vpci": 1
+  },
+  "scoring": {
+    "horizon": "next_4h_close",
+    "baseline": "always_long"
+  },
+  "replay": {
+    "reference_period": [
+      "2018-01-01",
+      "2023-12-31"
+    ],
+    "check_period_start": "2024-01-01"
+  },
+  "tries_log": [
+    {
+      "date": "2026-10-04",
+      "change": "판정·지표 계산 변경(세부 조건·수치는 비공개)",
+      "saw_check_period": false,
+      "reason": "세부 사유 메모와 참고 기간 성적은 공개 저장소에서 뺌(팀 결정 2026-10-13, 공개 범위)"
+    },
+    {
+      "date": "2026-10-04",
+      "change": "판정·지표 계산 변경(세부 조건·수치는 비공개)",
+      "saw_check_period": true,
+      "reason": "세부 사유 메모와 참고 기간 성적은 공개 저장소에서 뺌(팀 결정 2026-10-13, 공개 범위)"
+    },
+    {
+      "date": "2026-10-06",
+      "change": "판정·지표 계산 변경(세부 조건·수치는 비공개)",
+      "saw_check_period": false,
+      "reason": "세부 사유 메모와 참고 기간 성적은 공개 저장소에서 뺌(팀 결정 2026-10-13, 공개 범위)"
+    },
+    {
+      "date": "2026-10-12",
+      "change": "판정·지표 계산 변경(세부 조건·수치는 비공개)",
+      "saw_check_period": false,
+      "reason": "세부 사유 메모와 참고 기간 성적은 공개 저장소에서 뺌(팀 결정 2026-10-13, 공개 범위)"
+    }
+  ],
+  "strong": {
+    "sequence": "vpci_after_alignment"
+  },
+  "trigger": {
+    "same_direction_filter": true
+  }
+}

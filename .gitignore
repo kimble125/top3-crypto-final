@@ -1,0 +1,19 @@
+# 비밀값·자료·실행 산출물은 올리지 않는다
+.env
+.env.*
+*.pem
+*.key
+**/.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+node_modules/
+*.db
+*.db-*
+*.sqlite
+**/data/raw/
+**/logs/
+*.log
+.vercel/
+top3-crypto/05_프론트/dist/
+alfredo/mvp/fonts/src/

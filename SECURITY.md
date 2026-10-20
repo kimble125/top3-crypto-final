@@ -74,7 +74,7 @@ flowchart LR
 |---|---|---|
 | 보내는 것 | 공개 시세 수치, GDELT 뉴스 제목(네이버 뉴스는 보내지 않음). 알프레도는 이용자 질문 + 합성 숫자 | 같은 입력(GPT 실패 때만) |
 | 개인정보 | 보내지 않음 | 보내지 않음 |
-| 학습 사용 | 개인 플랜은 설정에 따라 학습에 쓰일 수 있음. 팀 계정은 2026-10-19 확인 때 **켜져 있었으며 이후 변경 여부는 미확인**(설정 > 데이터 관리 > '모델 개선을 위한 데이터 학습 허용') (OpenAI 도움말 https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance ) | 설정 > 개인정보 > 모델 개선 토글. 팀 계정은 **꺼져 있음**(2026-10-19 확인). 피드백을 준 대화는 예외 (https://www.anthropic.com/legal/consumer-terms ) |
+| 학습 사용 | 개인 플랜은 설정에 따라 학습에 쓰일 수 있음. 팀 계정은 2026-10-19 확인 때 켜져 있었고 **2026-10-20 09:38 KST에 껐다**(설정 > 데이터 관리 > '모델 개선을 위한 데이터 학습 허용'). 끈 뒤의 새 대화·Codex 작업부터 적용되며, 좋아요·싫어요 피드백을 준 대화와 Codex 'Include environments' 설정은 예외 (OpenAI 도움말 https://help.openai.com/en/articles/5722486-how-your-data-is-used-to-improve-model-performance ) | 설정 > 개인정보 > 모델 개선 토글. 팀 계정은 **꺼져 있음**(2026-10-19 확인). 피드백을 준 대화는 예외 (https://www.anthropic.com/legal/consumer-terms ) |
 | 보관 기간 | 지운 대화는 30일 안에 영구 삭제 예약 (https://help.openai.com/en/articles/8983778-chat-and-file-retention-in-chatgpt ) | 학습을 끈 경우 30일 (https://privacy.claude.com/en/articles/10023548-how-long-do-you-store-my-data ) |
 | 자동 이용 조항 | 개인용 약관은 '프로그래밍 방식의 출력 추출'을 금지하고, Codex 문서는 자동 작업에 API 키 사용을 권한다 (https://openai.com/policies/row-terms-of-use , https://developers.openai.com/codex/auth ) | 소비자 약관은 API 키나 명시 허용 없이 자동화된 방식의 접속을 금지한다 (consumer-terms 3조 7호) |
 | 화면 표시 | 'AI 분석' 카드·탭 안에 두고, 추정치에 'AI 추정', 쓴 모델 이름을 표시 | 같음 |

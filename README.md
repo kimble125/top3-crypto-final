@@ -15,6 +15,7 @@
 | 보안·개인정보 설계(데이터 흐름도) | [SECURITY.md](SECURITY.md) |
 | 이용약관 · 개인정보 처리방침 · AI 이용 고지 | [docs/legal/](docs/legal/) |
 | 개발 과정(버전 V1–V5, 커밋 104개 요약) | [docs/development-history.md](docs/development-history.md) |
+| 후속작_Alfredo | [alfredo_후속작/](alfredo_%ED%9B%84%EC%86%8D%EC%9E%91/) |
 
 ## 무엇이 동작하나
 
@@ -33,7 +34,7 @@ top3-crypto/          Top 3 Crypto 제출용 공개 사본(운영본 V5_1014에�
   04_엔진/            지표·확신도·트리거 계산, AI 분석 호출과 검사
   05_프론트/          화면(HTML·JS, 빌드 없음)
   01_운영/공부노트/   공부 탭에 나오는 노트
-alfredo/              향후 발전 계획 데모(모의투자 엔진 + 대시보드 + 채팅 서버)
+alfredo_후속작/       향후 발전 계획 데모(모의투자 엔진 + 대시보드 + 채팅 서버)
 presentation/         발표 자료, 시연 영상, 초기 기획서
 docs/                 약관 3종, 개발 과정
 ```
@@ -63,18 +64,18 @@ cd top3-crypto
 (cd 03_백엔드 && python3 -m unittest discover -s tests)      # 36개(4개 건너뜀: 자료 DB 필요, fastapi 필요)
 (cd 02_데이터수집 && python3 -m unittest discover -s tests)  # 8개
 (cd 05_프론트 && node --test tests/*.test.js)                # 3개
-cd ../alfredo
+cd ../alfredo_후속작
 python3 -I -m unittest discover -s alfredo/tests             # 16개
 python3 -I -m unittest discover -s mvp/tests                 # 31개
 ```
 
 ### 알프레도 데모
 ```bash
-cd alfredo
+cd alfredo_후속작
 python3 mvp/build_board.py           # 합성 가격으로 대시보드 만들기(바깥 호출 없음)
 python3 -I mvp/chat_server.py        # http://127.0.0.1:8787/ (이 컴퓨터 안에서만 열림)
 ```
-채팅은 Codex CLI(ChatGPT 로그인)가 있어야 답합니다. 없으면 `alfredo/mvp/dist/alfredo_mvp_board.html`을 브라우저로 열어 화면만 볼 수 있습니다.
+채팅은 Codex CLI(ChatGPT 로그인)가 있어야 답합니다. 없으면 `alfredo_후속작/mvp/dist/alfredo_mvp_board.html`을 브라우저로 열어 화면만 볼 수 있습니다.
 
 ## 이 저장소에 넣지 않은 것
 
@@ -85,7 +86,7 @@ python3 -I mvp/chat_server.py        # http://127.0.0.1:8787/ (이 컴퓨터 안
 ## 저작권과 출처
 
 - 코드와 문서: © 2026 Top 3 팀. 열람·평가 목적으로 공개하며 오픈소스 라이선스를 주지 않습니다. 다시 쓰려면 Issues로 문의해 주세요.
-- 글꼴 Pretendard(SIL Open Font License 1.1): 화면은 CDN, 알프레도는 글자 일부만 남긴 사본(`alfredo/mvp/fonts/OFL_Pretendard.txt`).
+- 글꼴 Pretendard(SIL Open Font License 1.1): 화면은 CDN, 알프레도는 글자 일부만 남긴 사본(`alfredo_후속작/mvp/fonts/OFL_Pretendard.txt`).
 - 데이터 출처: Binance, Coinbase, alternative.me 공포탐욕지수, 네이버 뉴스 검색, [GDELT 프로젝트](https://www.gdeltproject.org/). 이들과 제휴 관계가 없습니다.
 - 만든 방법: Claude Code·Codex·Aside 같은 AI 도구를 함께 썼습니다(발표 자료와 공부 노트에 표시).
 

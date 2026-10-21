@@ -11,7 +11,7 @@
 |---|---|
 | 실시간 화면 | https://top3-crypto.vercel.app |
 | 시연 영상(약 2분 18초, 무음·자막) | [presentation/top3-crypto-demo.mp4](presentation/top3-crypto-demo.mp4) |
-| 발표 자료 | [presentation/Top3_Crypto_발표_2026-10-21.pdf](presentation/Top3_Crypto_%EB%B0%9C%ED%91%9C_2026-10-21.pdf) |
+| 발표 자료 | [발표자료 PDF (presentation/)](presentation/Top%203%20Crypto%20%ED%94%8C%EB%9E%AB%ED%8F%BC%20_%20%EB%B0%9C%ED%91%9C%EC%9E%90%EB%A3%8C_20261020_final.pdf) |
 | 보안·개인정보 설계(데이터 흐름도) | [SECURITY.md](SECURITY.md) |
 | 이용약관 · 개인정보 처리방침 · AI 이용 고지 | [docs/legal/](docs/legal/) |
 | 개발 과정(버전 V1–V5, 커밋 104개 요약) | [docs/development-history.md](docs/development-history.md) |
@@ -35,7 +35,7 @@ top3-crypto/          Top 3 Crypto 제출용 공개 사본(운영본 V5_1014에�
   05_프론트/          화면(HTML·JS, 빌드 없음)
   01_운영/공부노트/   공부 탭에 나오는 노트
 alfredo_후속작/       향후 발전 계획 데모(모의투자 엔진 + 대시보드 + 채팅 서버)
-presentation/         발표 자료, 시연 영상, 초기 기획서
+presentation/         발표 자료(PDF·PPTX), 시연 영상
 docs/                 약관 3종, 개발 과정
 ```
 

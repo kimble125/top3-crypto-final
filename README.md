@@ -11,8 +11,7 @@
 |---|---|
 | 실시간 화면 | https://top3-crypto.vercel.app |
 | 시연 영상(약 2분 18초, 무음·자막) | [presentation/top3-crypto-demo.mp4](presentation/top3-crypto-demo.mp4) |
-| 발표 자료 | [presentation/top3-crypto-slides.pdf](presentation/top3-crypto-slides.pdf) |
-| 초기 기획서 | [presentation/top3-crypto-plan.pdf](presentation/top3-crypto-plan.pdf) |
+| 발표 자료 | [presentation/Top3_Crypto_발표_2026-10-21.pdf](presentation/Top3_Crypto_%EB%B0%9C%ED%91%9C_2026-10-21.pdf) |
 | 보안·개인정보 설계(데이터 흐름도) | [SECURITY.md](SECURITY.md) |
 | 이용약관 · 개인정보 처리방침 · AI 이용 고지 | [docs/legal/](docs/legal/) |
 | 개발 과정(버전 V1–V5, 커밋 104개 요약) | [docs/development-history.md](docs/development-history.md) |

@@ -15,7 +15,7 @@
 | 보안·개인정보 설계(데이터 흐름도) | [SECURITY.md](SECURITY.md) |
 | 이용약관 · 개인정보 처리방침 · AI 이용 고지 | [docs/legal/](docs/legal/) |
 | 개발 과정(버전 V1–V5, 커밋 104개 요약) | [docs/development-history.md](docs/development-history.md) |
-| 후속작 실시간 화면 | [http://127.0.0.1:8787/](http://127.0.0.1:8787/) (발표 컴퓨터에서 서버를 켠 동안만 열림) · [코드 폴더 alfredo_후속작/](alfredo_%ED%9B%84%EC%86%8D%EC%9E%91/) |
+| 후속작 실시간 화면 | [http://127.0.0.1:8787/](http://127.0.0.1:8787/) · [코드](alfredo_%ED%9B%84%EC%86%8D%EC%9E%91/) |
 
 ## 무엇이 동작하나
 
